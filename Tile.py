@@ -1,0 +1,107 @@
+import pygame
+
+class Tile:
+	def __init__(self, x, y, size):
+		self._x = x
+		self._y = y
+		self._size = size
+		self._mine = False
+		
+		# tuple of adjacentTiles
+		self._nearbyMines = 0
+		
+		self._revealed = False
+		self._flagged = False
+		
+		self._color = 200
+		self._outline = 100
+		
+	def BeMine(self):
+		self._mine = True
+		
+	def IsMine(self):
+		return self._mine
+		
+	def AdjacentTiles(self, adj):
+		self._adjacentTiles = adj
+		
+		for tile in self._adjacentTiles:
+			if (tile is not None and tile.IsMine()):
+				self._nearbyMines = self._nearbyMines + 1
+	
+	def Draw(self):
+		#border
+		pygame.draw.rect(pygame.display.get_surface(), 
+		(self._outline, self._outline, self._outline), 
+		(self._x, self._y, self._size, self._size))
+		
+		#tile
+		nx = self._x + 1
+		ny = self._y + 1
+		ns = self._size - 2
+		pygame.draw.rect(pygame.display.get_surface(), 
+		(self._color, self._color, self._color), 
+		(nx, ny, ns, ns))
+		
+		if (self._revealed and self._mine):
+			# has a mine
+			pygame.draw.ellipse(pygame.display.get_surface(),
+			(0, 0, 0), 
+			(nx+2, ny+2, 
+			ns-4, ns-4))
+		elif (self._revealed and self._nearbyMines > 0):
+			font = pygame.font.SysFont("Times New Roman", 14, True)
+			textSurface = font.render(str(self._nearbyMines), False, (0, 0, 0))
+			pygame.display.get_surface().blit(textSurface, (self._x + 6, self._y+3))
+		
+		#flag?
+		if (self._flagged and not self._revealed):
+			cx = int(self._x + (self._size / 2))
+			cy = int(self._y + (self._size / 2))
+			tip = int(self._size / 2 - 4)
+			
+			pygame.draw.polygon(pygame.display.get_surface(),
+			(255, 0, 0),
+			[[cx, ny+2], [cx, cy+2], [cx+tip, cy]])
+			
+			pygame.draw.line(pygame.display.get_surface(),
+			(255, 0, 0),
+			[cx, cy], [cx, self._y + self._size - 3])
+		
+	def Update(self, tick):
+		#animation stuff here.
+		x = False
+		
+	def Click(self, mx, my, mtype):
+		if (mx > self._x  and mx < self._x + self._size and 
+		my > self._y and my < self._y + self._size):
+			if (mtype == 0):
+				#left click
+				self.Reveal()
+				
+				# Test
+				# if (not self._mine):
+				# 	print(self._nearbyMines)
+				#
+			elif (mtype == 1):
+				#right click
+				self._flagged = not self._flagged
+	
+	def Reveal(self):
+		self._revealed = True
+		self._color = 240	
+		
+		#only cascade if the tile is blank
+		if (self._nearbyMines == 0 and not self._mine):
+			self.Cascade()
+		
+	def Revealed(self):
+		return self._revealed
+		
+	def Cascade(self):
+		for tile in self._adjacentTiles:
+			if (tile is not None and not tile.Revealed()):
+				tile.Reveal()
+		
+		
+	
