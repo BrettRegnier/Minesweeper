@@ -136,9 +136,10 @@ class Grid:
                 
             self._tiles[i].AdjacentTiles(adj)
 
-    def Update(self):
+    def Update(self, tick):
         # animations?
-        x = True
+        for tile in self._tiles:
+            tile.Update(tick)
 
     def Draw(self):
         # draw tiles
