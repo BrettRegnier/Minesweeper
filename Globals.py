@@ -1,5 +1,6 @@
 import pygame
 
-def Init():
-    global font
-    font = pygame.font.SysFont("Times New Roman", 12)
+global font
+font = None
+global _screenshot
+_screenshot = None

@@ -3,6 +3,10 @@
 	"python.linting.enabled": true,
 	"python.linting.pylintArgs": [
 		"----extension-pkg-whitelist=1xml"
-		]
+		],
+		
+	"editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.acceptSuggestionOnEnter": "off"
 }
 

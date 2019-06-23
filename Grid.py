@@ -4,7 +4,7 @@ import Tile
 
 
 class Grid:
-    def __init__(self, x, y, width, height, difficulty):
+    def __init__(self, x, y, width, height, difficulty, screen):
         if (difficulty == 1):
             # easy
             self._mines = 10
@@ -19,6 +19,8 @@ class Grid:
         self._y = y
         self._width = width
         self._height = height
+        
+        self._screen = screen
 
         self.Build()
 
@@ -31,12 +33,14 @@ class Grid:
 
         rows = int(self._height / size)
         columns = int(self._width / size)
+        count = 0
 
         # create tiles 1-d
         for r in range(rows):
             for c in range(columns):
-                self._tiles.append(Tile.Tile(self._x + x, self._y + y, size))
+                self._tiles.append(Tile.Tile(self._x + x, self._y + y, size, count, self._screen))
                 x = x + size
+                count = count + 1
 
             x = 0
             y = y + size
@@ -151,3 +155,7 @@ class Grid:
             if (mx > self._x and mx < self._x + self._width and
                     my > self._y and my < self._y + self._height):
                 tile.Click(mx, my, mtype)
+
+    def Screenshot(self):
+        for tile in self._tiles:
+            tile.Screenshot()

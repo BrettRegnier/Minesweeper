@@ -3,16 +3,17 @@ import Globals
 import MenuItem
 
 class Menu:
-    def __init__(self, wWidth, wHeight):
+    def __init__(self, wWidth, wHeight, screen):
         self._wW = wWidth
         self._wH = wHeight 
+        self._screen = screen
         
         self._width = wWidth
         self._height = 20
         
         self._items = []
-        newGame = MenuItem.MenuItem("New Game", 0, 0)
-        help = MenuItem.MenuItem("Help", newGame.Right(), 0)
+        newGame = MenuItem.MenuItem("New Game", 0, 0, screen)
+        help = MenuItem.MenuItem("Help", newGame.Right(), 0, screen)
         
         self._items.append(newGame)
         self._items.append(help)
@@ -21,7 +22,7 @@ class Menu:
         x = True
         
     def Draw(self):
-        pygame.draw.line(pygame.display.get_surface(), 
+        pygame.draw.line(self._screen, 
         (40, 40, 40), 
         (0,self._height), (self._width, self._height), 
         1)

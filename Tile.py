@@ -1,10 +1,14 @@
 import pygame
+import Globals
 
 class Tile:
-    def __init__(self, x, y, size):
+    def __init__(self, x, y, size, id, screen):
+        self._id = id 
         self._x = x
         self._y = y
         self._size = size
+        self._screen = screen
+        
         self._mine = False
         
         # tuple of adjacentTiles
@@ -31,7 +35,7 @@ class Tile:
     
     def Draw(self):
         #border
-        pygame.draw.rect(pygame.display.get_surface(), 
+        pygame.draw.rect(self._screen, 
         (self._outline, self._outline, self._outline), 
         (self._x, self._y, self._size, self._size))
         
@@ -102,6 +106,7 @@ class Tile:
         for tile in self._adjacentTiles:
             if (tile is not None and not tile.Revealed()):
                 tile.Reveal()
-        
-        
-    
+     
+    def Screenshot(self):
+        Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
+        Globals._screenshot.Save(self._id, "./imgs/")
