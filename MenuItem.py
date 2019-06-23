@@ -14,9 +14,8 @@ class MenuItem:
         self._w = self._w + 6
         
     def Draw(self):
-        surface = pygame.display.get_surface()
         textSurface = Globals._font.render(self._string, False, (0, 0, 0))
-        surface.blit(textSurface, (self._x + 3, self._y))
+        self._screen.blit(textSurface, (self._x + 3, self._y))
     
     def Update(self, tick):
         x = True

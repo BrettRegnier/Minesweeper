@@ -43,20 +43,20 @@ class Tile:
         nx = self._x + 1
         ny = self._y + 1
         ns = self._size - 2
-        pygame.draw.rect(pygame.display.get_surface(), 
+        pygame.draw.rect(self._screen, 
         (self._color, self._color, self._color), 
         (nx, ny, ns, ns))
         
         if (self._revealed and self._mine):
             # has a mine
-            pygame.draw.ellipse(pygame.display.get_surface(),
+            pygame.draw.ellipse(self._screen,
             (0, 0, 0), 
             (nx+2, ny+2, 
             ns-4, ns-4))
         elif (self._revealed and self._nearbyMines > 0):
             font = pygame.font.SysFont("Times New Roman", 14, True)
             textSurface = font.render(str(self._nearbyMines), False, (0, 0, 0))
-            pygame.display.get_surface().blit(textSurface, (self._x + 6, self._y+3))
+            self._screen.blit(textSurface, (self._x + 6, self._y+3))
         
         #flag?
         if (self._flagged and not self._revealed):
@@ -64,11 +64,11 @@ class Tile:
             cy = int(self._y + (self._size / 2))
             tip = int(self._size / 2 - 4)
             
-            pygame.draw.polygon(pygame.display.get_surface(),
+            pygame.draw.polygon(self._screen,
             (255, 0, 0),
             [[cx, ny+2], [cx, cy+2], [cx+tip, cy]])
             
-            pygame.draw.line(pygame.display.get_surface(),
+            pygame.draw.line(self._screen,
             (255, 0, 0),
             [cx, cy], [cx, self._y + self._size - 3])
         
