@@ -20,6 +20,9 @@ class Tile:
         self._color = 200
         self._outline = 100
         
+    def OverrideValue(self, val):
+        self._nearbyMines = val
+    
     def BeMine(self):
         self._mine = True
         

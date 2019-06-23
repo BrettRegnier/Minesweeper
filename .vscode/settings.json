@@ -1,5 +1,5 @@
 {
-	"python.linting.pylintEnabled": true,
+	"python.linting.pylintEnabled": false,
 	"python.linting.enabled": true,
 	"python.linting.pylintArgs": [
 		"----extension-pkg-whitelist=1xml"
@@ -7,6 +7,8 @@
 		
 	"editor.tabSize": 4,
     "editor.insertSpaces": true,
-    "editor.acceptSuggestionOnEnter": "off"
+    "editor.acceptSuggestionOnEnter": "off",
+    "python.pythonPath": "D:\\dev\\lang\\python3_7_3\\python.exe",
+    "python.linting.pylamaEnabled": true
 }
 

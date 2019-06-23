@@ -40,6 +40,7 @@ class Grid:
             for c in range(columns):
                 self._tiles.append(Tile.Tile(self._x + x, self._y + y, size, count, self._screen))
                 x = x + size
+                # self._tiles[count].OverrideValue(count)
                 count = count + 1
 
             x = 0
