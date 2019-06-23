@@ -40,19 +40,19 @@ class Grid:
             for c in range(columns):
                 self._tiles.append(Tile.Tile(self._x + x, self._y + y, size, count, self._screen))
                 x = x + size
-                # self._tiles[count].OverrideValue(count)
+                self._tiles[count].OverrideValue(count)
                 count = count + 1
 
             x = 0
             y = y + size
 
-        toMakeMine = self._mines
-        # make them mine
-        while (toMakeMine > 0):
-            tile = random.choice(self._tiles)
-            if (not tile.IsMine()):
-                tile.BeMine()
-                toMakeMine = toMakeMine - 1
+        # toMakeMine = self._mines
+        # # make them mine
+        # while (toMakeMine > 0):
+        #     tile = random.choice(self._tiles)
+        #     if (not tile.IsMine()):
+        #         tile.BeMine()
+        #         toMakeMine = toMakeMine - 1
 
         # make tiles known to eachother
         tpr = columns  # Tiles per row

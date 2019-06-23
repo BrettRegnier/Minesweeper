@@ -20,8 +20,11 @@ class Tile:
         self._color = 200
         self._outline = 100
         
+    # for training purposes
     def OverrideValue(self, val):
         self._nearbyMines = val
+        self._revealed = True
+        self._color = 240
     
     def BeMine(self):
         self._mine = True
@@ -57,8 +60,7 @@ class Tile:
             (nx+2, ny+2, 
             ns-4, ns-4))
         elif (self._revealed and self._nearbyMines > 0):
-            font = pygame.font.SysFont("Times New Roman", 14, True)
-            textSurface = font.render(str(self._nearbyMines), False, (0, 0, 0))
+            textSurface = Globals._font.render(str(self._nearbyMines), False, (0, 0, 0))
             self._screen.blit(textSurface, (self._x + 6, self._y+3))
         
         #flag?
@@ -82,7 +84,7 @@ class Tile:
     def Click(self, mx, my, mtype):
         if (mx > self._x  and mx < self._x + self._size and 
         my > self._y and my < self._y + self._size):
-            if (mtype == 0):
+            if (mtype == 0 and self._revealed == False):
                 #left click
                 self.Reveal()
                 
@@ -111,5 +113,6 @@ class Tile:
                 tile.Reveal()
      
     def Screenshot(self):
-        Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
-        Globals._screenshot.Save(self._id, "./imgs/")
+        if self._id < 9 and not self._id == 0:
+            Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
+            Globals._screenshot.Save(str(self._id) + Globals._fontname, "./imgs/")

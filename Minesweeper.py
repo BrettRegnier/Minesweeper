@@ -35,6 +35,12 @@ _GKey = False
 _grid = None
 _menu = None
 
+global _screenshotFonts
+global _fontidx
+# Training stuff
+_screenshotFonts = False
+_fontidx = 0
+
 def Init():
     global _screen
     global _clock
@@ -54,7 +60,8 @@ def Init():
     pygame.font.init()
     
     print("initalize globals")
-    Globals._font = pygame.font.SysFont("Times New Roman", 12)    
+    Globals._fontname = "Times New Roman"
+    Globals._font = pygame.font.SysFont(Globals._fontname, 12)    
     Globals._screenshot = Screenshot.Screenshot(_screen)
 
 def InitGame():
@@ -76,6 +83,8 @@ def MainLoop():
     
     Events()
     
+    GetAllFontScreenshots()
+    
     pygame.display.update()
     
 def Events():
@@ -83,6 +92,9 @@ def Events():
     global _mtype
     global _GKey
     global _SKey
+    
+    # training
+    global _screenshotFonts
     
     # event handling
     for event in pygame.event.get():
@@ -102,11 +114,13 @@ def Events():
                 _GKey = True
             elif (pygame.key.get_pressed()[pygame.K_s]):
                 _SKey = True
+            elif (pygame.key.get_pressed()[pygame.K_p]):
+                _screenshotFonts = True
         elif event.type == pygame.KEYUP:
             if _GKey:
                 _GKey = False
                 _SKey = False
-                _grid.Screenshot()
+                ScreenshotGrid()
             if _SKey:
                 _SKey = False
                 _GKey = False
@@ -132,13 +146,26 @@ def Draw():
     _menu.Draw()
     _grid.Draw()
     
+def GetAllFontScreenshots():
+    global _fontidx
+    # This is for taking pic of all types of fonts of numbers
+    if _screenshotFonts:
+        if (_fontidx < len(pygame.font.get_fonts())):
+            Globals._fontname = pygame.font.get_fonts()[_fontidx]
+            Globals._font = pygame.font.SysFont(Globals._fontname, 12)
+            _fontidx = _fontidx + 1
+            ScreenshotGrid()
+
+def ScreenshotGrid():
+    _grid.Screenshot()
+  
 def Run():
     Init()
     InitGame()
     
     while _running:
         MainLoop()
-        
+
 def main():
     Run()
         
