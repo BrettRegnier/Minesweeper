@@ -19,7 +19,7 @@ class Menu:
         self._items.append(help)
         
     def Update(self, tick):
-        x = True
+        pass
         
     def Draw(self):
         pygame.draw.line(self._screen, 

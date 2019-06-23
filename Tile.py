@@ -74,7 +74,7 @@ class Tile:
         
     def Update(self, tick):
         #animation stuff here.
-        x = False
+        pass
         
     def Click(self, mx, my, mtype):
         if (mx > self._x  and mx < self._x + self._size and 

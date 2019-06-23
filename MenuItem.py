@@ -18,13 +18,13 @@ class MenuItem:
         self._screen.blit(textSurface, (self._x + 3, self._y))
     
     def Update(self, tick):
-        x = True
+        pass
     
     def MouseHover(self, mx, my):
-        x = True
+        pass
         
     def Click(self, mx, my, mType):
-        x = True
+        pass
         
     def Left(self):
         return self._x
