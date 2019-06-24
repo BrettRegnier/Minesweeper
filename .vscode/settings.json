@@ -8,7 +8,6 @@
 	"editor.tabSize": 4,
     "editor.insertSpaces": true,
     "editor.acceptSuggestionOnEnter": "off",
-    "python.pythonPath": "D:\\dev\\lng\\python3_7_2\\python.exe",
     "python.linting.pylamaEnabled": true
 }
 

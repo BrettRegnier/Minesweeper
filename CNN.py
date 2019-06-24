@@ -7,57 +7,68 @@ from keras.layers import MaxPooling2D
 from keras.layers import Flatten
 from keras.layers import Dense
 
-# Initialize the CNN
-classifier = Sequential()
 
-# Convolution
-classifier.add(Convolution2D(32, 3, 3, input_shape = (20, 20, 3), activation = 'relu'))
+import os
 
-# Pooling
-classifier.add(MaxPooling2D(pool_size = (2, 2)))
+classifier = None
 
-# Flattening
-classifier.add(Flatten())
+if os.path.isfile('/model.h5'):
+    from keras.models import load_model
+    classifier = load_model('model.h5')
+else:
+    # Initialize the CNN
+    classifier = Sequential()
 
-# Full connection
-classifier.add(Dense(output_dim = 128, activation='relu'))
-classifier.add(Dense(output_dim = 1, activation='sigmoid'))
+    # Convolution
+    classifier.add(Convolution2D(32, 3, 3, input_shape = (20, 20, 3), activation = 'relu'))
 
-# Compile CNN
-classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+    # Pooling
+    classifier.add(MaxPooling2D(pool_size = (2, 2)))
 
-# Fitting the CNN to the images
-from keras.preprocessing.image import ImageDataGenerator
+    # Flattening
+    classifier.add(Flatten())
 
-train_datagen = ImageDataGenerator(
-    rescale=1./255,
-    shear_range=0.2,
-    zoom_range=0.2,
-    horizontal_flip=True)
-    
-test_datagen = ImageDataGenerator(rescale=1./255)
+    # Full connection
+    classifier.add(Dense(output_dim = 128, activation='relu'))
+    classifier.add(Dense(output_dim = 1, activation='sigmoid'))
 
-training_set = train_datagen.flow_from_directory(
-    'dataset/training',
-    target_size = (20, 20),
-    batch_size = 32,
-    class_mode = 'binary')
+    # Compile CNN
+    classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
 
-test_set = test_datagen.flow_from_directory(
-    'dataset/test',
-    target_size = (20, 20),
-    batch_size = 32,
-    class_mode = 'binary')
+    # Fitting the CNN to the images
+    from keras.preprocessing.image import ImageDataGenerator
 
-from IPython.display import display
-from PIL import Image
+    train_datagen = ImageDataGenerator(
+        rescale=1./255,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
+        
+    test_datagen = ImageDataGenerator(rescale=1./255)
 
-classifier.fit_generator(
-    training_set,
-    steps_per_epoch=8000,
-    epochs=1,
-    validation_data=test_set,
-    validation_steps=800)
+    training_set = train_datagen.flow_from_directory(
+        'dataset/training',
+        target_size = (20, 20),
+        batch_size = 32,
+        class_mode = 'binary')
+
+    test_set = test_datagen.flow_from_directory(
+        'dataset/test',
+        target_size = (20, 20),
+        batch_size = 32,
+        class_mode = 'binary')
+
+    from IPython.display import display
+    from PIL import Image
+
+    classifier.fit_generator(
+        training_set,
+        steps_per_epoch=8000,
+        epochs=1,
+        validation_data=test_set,
+        validation_steps=800)
+        
+    classifier.save_weights('model.h5')
     
 import numpy as np
 from keras.preprocessing import image
