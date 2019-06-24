@@ -1,1 +1,1 @@
-pip install Pygame Pillow Pyscreenshot
+pip install Pygame
