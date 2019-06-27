@@ -8,6 +8,7 @@
 	"editor.tabSize": 4,
     "editor.insertSpaces": true,
     "editor.acceptSuggestionOnEnter": "off",
-    "python.linting.pylamaEnabled": true
+	"python.linting.pylamaEnabled": true,
+	"git.ignoreLimitWarning": true
 }
 

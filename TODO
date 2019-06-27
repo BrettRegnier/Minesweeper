@@ -2,3 +2,5 @@ Add different differentiating colors for the mines nearby
 Game over
 Reset
 Menu
+
+Need to raise an event that a tile has been clicked and then run the AI
