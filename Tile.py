@@ -1,6 +1,8 @@
 import pygame
 import Globals
 
+import random
+
 class Tile:
     def __init__(self, x, y, size, id, screen, count):
         padding = len(str(count))
@@ -18,14 +20,18 @@ class Tile:
         self._revealed = False
         self._flagged = False
         
-        self._color = 180
+        self._outercolor = 255
+        self._innercolor = 200        
+        self._revealedcolor = 180        
         self._outline = 100
+        
+        # For training
+        self._colorTraining = False
         
     # for training purposes
     def OverrideValue(self, val):
         self._nearbyMines = val
         self._revealed = True
-        self._color = 240
     
     def BeMine(self):
         self._mine = True
@@ -46,13 +52,46 @@ class Tile:
         (self._outline, self._outline, self._outline), 
         (self._x, self._y, self._size, self._size))
         
-        #tile
-        nx = self._x + 1
-        ny = self._y + 1
-        ns = self._size - 2
-        pygame.draw.rect(self._screen, 
-        (self._color, self._color, self._color), 
-        (nx, ny, ns, ns))
+        # revealed tile
+        if (self._revealed):
+            c = self._revealedcolor
+            nx = self._x + 1
+            ny = self._y + 1
+            ns = self._size -2
+            
+            pygame.draw.rect(self._screen, (c, c, c), (nx, ny, ns, ns))
+            
+            if self._colorTraining:
+                r = random.randint(0,255)
+                g = random.randint(0,255)
+                b = random.randint(0,255)
+                pygame.draw.rect(self._screen, (r, g, b), (nx, ny, ns, ns))
+        else:
+            # decor
+            ci = self._innercolor
+            co = self._outercolor
+            
+            # outer design
+            nx = self._x + 1
+            ny = self._y + 1
+            ns = self._size - 2
+            pygame.draw.rect(self._screen, 
+            (co, co, co), 
+            (nx, ny, ns, ns))
+            
+            # inner design
+            nx = self._x + 3
+            ny = self._y + 3
+            ns = self._size - 4
+            pygame.draw.rect(self._screen, 
+            (ci, ci, ci), 
+            (nx, ny, ns, ns))
+            
+            if self._colorTraining:
+                r = random.randint(0,255)
+                g = random.randint(0,255)
+                b = random.randint(0,255)
+                pygame.draw.rect(self._screen, (r, g, b), (nx, ny, ns, ns))
         
         if (self._revealed and self._mine):
             # has a mine
@@ -61,10 +100,11 @@ class Tile:
             (nx+2, ny+2, 
             ns-4, ns-4))
         elif (self._revealed and self._nearbyMines > 0):
+            # mines nearby
             textSurface = Globals._font.render(str(self._nearbyMines), False, (0, 0, 0))
-            self._screen.blit(textSurface, (self._x + 6, self._y+3))
+            self._screen.blit(textSurface, (self._x + 8, self._y + 5))
         
-        #flag?
+        # flag
         if (self._flagged and not self._revealed):
             cx = int(self._x + (self._size / 2))
             cy = int(self._y + (self._size / 2))
@@ -99,7 +139,6 @@ class Tile:
     
     def Reveal(self):
         self._revealed = True
-        self._color = 255
         
         #only cascade if the tile is blank
         if (self._nearbyMines == 0 and not self._mine):
@@ -119,4 +158,8 @@ class Tile:
             # Globals._screenshot.Save(str(self._id) + Globals._fontname, "./dataset/gameset/")
             
         Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
-        Globals._screenshot.Save(str(self._id), "./dataset/gameset/")            
+        Globals._screenshot.Save(str(self._id), "./dataset/gameset/")
+    
+    def RandomizeColor(self):
+        self._colorTraining = True
+        

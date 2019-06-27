@@ -14,7 +14,7 @@ import os
 classifier = Sequential()
 
 # Convolution
-classifier.add(Convolution2D(32, 3, 3, input_shape = (20, 20, 3), activation = 'relu'))
+classifier.add(Convolution2D(64, 3, 1, input_shape = (64, 64, 3), activation = 'relu'))
 
 # Pooling
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
@@ -37,39 +37,44 @@ train_datagen = ImageDataGenerator(
     shear_range=0.2,
     zoom_range=0.2,
     horizontal_flip=True)
-    
 test_datagen = ImageDataGenerator(rescale=1./255)
+
 training_set = train_datagen.flow_from_directory(
-    'dataset/training',
-    target_size = (20, 20),
-    batch_size = 32,
+    'dataset/tile/training',
+    target_size = (64, 64),
+    batch_size = 10,
     class_mode = 'binary')
 
 test_set = test_datagen.flow_from_directory(
-    'dataset/test',
-    target_size = (20, 20),
-    batch_size = 32,
+    'dataset/tile/test',
+    target_size = (64, 64),
+    batch_size = 10,
     class_mode = 'binary')
 
 from IPython.display import display
 from PIL import Image
 
-if os.path.isfile('OneTwoWeights.h5'):
-    classifier.load_weights('OneTwoWeights.h5')
+if os.path.isfile('BinaryClass.h5'):
+    classifier.load_weights('BinaryClass.h5')
 else:
     classifier.fit_generator(
         training_set,
         steps_per_epoch=100,
-        epochs=2,
+        epochs=1,
         validation_data=test_set,
-        validation_steps=20)
+        validation_steps=80)
         
-    classifier.save_weights('OneTwoWeights.h5')
+    classifier.save_weights('BinaryClass.h5')
     
 import numpy as np
 from keras.preprocessing import image
-test_image = image.load_img('dataset/2algerian.jpg', target_size = (20, 20))
+test_image = image.load_img('dataset/tile/unrevealed.jpg', target_size = (64, 64))
 test_image = image.img_to_array(test_image)
 test_image = np.expand_dims(test_image, axis=0)
 result = classifier.predict(test_image)
-print(result)
+if result[0][0] >= 0.5:
+    prediction = "2"
+else:
+    prediction = "1"
+    
+print(prediction)

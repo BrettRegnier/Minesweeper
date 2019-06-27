@@ -35,11 +35,15 @@ _GKey = False
 _grid = None
 _menu = None
 
+# Training stuff
 global _screenshotFonts
 global _fontidx
-# Training stuff
+global _screenshotRandomColors
+global colorcount
 _screenshotFonts = False
 _fontidx = 0
+_screenshotRandomColors = False
+_colorcount = 0
 
 def Init():
     global _screen
@@ -83,7 +87,9 @@ def MainLoop():
     
     Events()
     
+    # Training
     GetAllFontScreenshots()
+    GetColorTraining()
     
     pygame.display.update()
     
@@ -95,6 +101,7 @@ def Events():
     
     # training
     global _screenshotFonts
+    global _screenshotRandomColors
     
     # event handling
     for event in pygame.event.get():
@@ -116,6 +123,8 @@ def Events():
                 _SKey = True
             elif (pygame.key.get_pressed()[pygame.K_p]):
                 _screenshotFonts = True
+            elif (pygame.key.get_pressed()[pygame.K_l]):
+                _screenshotRandomColors = True
         elif event.type == pygame.KEYUP:
             if _GKey:
                 _GKey = False
@@ -155,6 +164,12 @@ def GetAllFontScreenshots():
             Globals._font = pygame.font.SysFont(Globals._fontname, 12)
             _fontidx = _fontidx + 1
             ScreenshotGrid()
+            
+def GetColorTraining():
+    global _screenshotRandomColors
+    if _screenshotRandomColors:
+        _grid.ChangeColors()
+        ScreenshotGrid()
 
 def ScreenshotGrid():
     _grid.Screenshot()

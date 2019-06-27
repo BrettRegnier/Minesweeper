@@ -40,13 +40,13 @@ train_datagen = ImageDataGenerator(
     
 test_datagen = ImageDataGenerator(rescale=1./255)
 training_set = train_datagen.flow_from_directory(
-    'dataset/training',
+    'dataset/binary/training',
     target_size = (20, 20),
     batch_size = 32,
     class_mode = 'binary')
 
 test_set = test_datagen.flow_from_directory(
-    'dataset/test',
+    'dataset/binary/test',
     target_size = (20, 20),
     batch_size = 32,
     class_mode = 'binary')
@@ -68,7 +68,7 @@ else:
     
 import numpy as np
 from keras.preprocessing import image
-test_image = image.load_img('dataset/2algerian.jpg', target_size = (20, 20))
+test_image = image.load_img('dataset/binary/1algerian.jpg', target_size = (20, 20))
 test_image = image.img_to_array(test_image)
 test_image = np.expand_dims(test_image, axis=0)
 result = classifier.predict(test_image)

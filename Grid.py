@@ -41,13 +41,17 @@ class Grid:
             for c in range(columns):
                 self._tiles.append(Tile.Tile(self._x + x, self._y + y, size, count, self._screen, total))
                 x = x + size
-                # self._tiles[count].OverrideValue(count)
+
+                # FOr training
+                self._tiles[count].OverrideValue(0)
+
                 count = count + 1
 
             x = 0
             y = y + size
 
-        toMakeMine = self._mines
+        # toMakeMine = self._mines
+        toMakeMine = 0
         # make them mine
         while (toMakeMine > 0):
             tile = random.choice(self._tiles)
@@ -62,7 +66,7 @@ class Grid:
             r = int(i / tpr)  # current row
             c = int(i % tpr)  # current column
 
-            testidx = 2
+            testidx = -1
 
             # adjacent tiles
             adj = []
@@ -161,3 +165,8 @@ class Grid:
     def Screenshot(self):
         for tile in self._tiles:
             tile.Screenshot()
+            
+    # training purposes
+    def ChangeColors(self):
+        for tile in self._tiles:
+            tile.RandomizeColor()
