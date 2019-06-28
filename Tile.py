@@ -6,7 +6,8 @@ import random
 class Tile:
     def __init__(self, x, y, size, id, screen, count):
         padding = len(str(count))
-        self._id = str(id).rjust(padding, '0')
+        self._id = id
+        self._strid = str(id).rjust(padding, '0')
         self._x = x
         self._y = y
         self._size = size
@@ -153,12 +154,12 @@ class Tile:
                 tile.Reveal()
      
     def Screenshot(self):
-        # if self._id < 9 and not self._id == 0:
-            # Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
-            # Globals._screenshot.Save(str(self._id) + Globals._fontname, "./dataset/gameset/")
+        if self._id < 9 and not self._id == 0:
+            Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
+            Globals._screenshot.Save(str(self._strid) + Globals._fontname, "./dataset/gameset/")
             
-        Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
-        Globals._screenshot.Save(str(self._id), "./dataset/gameset/")
+        # Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
+        # Globals._screenshot.Save(str(self._id), "./dataset/gameset/")
     
     def RandomizeColor(self):
         self._colorTraining = True

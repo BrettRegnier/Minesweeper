@@ -42,16 +42,16 @@ class Grid:
                 self._tiles.append(Tile.Tile(self._x + x, self._y + y, size, count, self._screen, total))
                 x = x + size
 
-                # FOr training
-                self._tiles[count].OverrideValue(0)
+                # For training
+                # self._tiles[count].OverrideValue(count)
 
                 count = count + 1
 
             x = 0
             y = y + size
 
-        # toMakeMine = self._mines
-        toMakeMine = 0
+        toMakeMine = self._mines
+        # toMakeMine = 0
         # make them mine
         while (toMakeMine > 0):
             tile = random.choice(self._tiles)

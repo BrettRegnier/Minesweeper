@@ -40,6 +40,7 @@ global _screenshotFonts
 global _fontidx
 global _screenshotRandomColors
 global colorcount
+global fonts
 _screenshotFonts = False
 _fontidx = 0
 _screenshotRandomColors = False
@@ -122,6 +123,7 @@ def Events():
             elif (pygame.key.get_pressed()[pygame.K_s]):
                 _SKey = True
             elif (pygame.key.get_pressed()[pygame.K_p]):
+                GetFontList()
                 _screenshotFonts = True
             elif (pygame.key.get_pressed()[pygame.K_l]):
                 _screenshotRandomColors = True
@@ -135,6 +137,21 @@ def Events():
                 _GKey = False
                 Globals._screenshot.CaptureWindow()
                 Globals._screenshot.Save("_Window", "./imgs/")
+
+def GetFontList():
+    # for training data
+    global fonts
+    from os import listdir
+    from os.path import isfile, join
+    path = 'fonts/'
+    files = [f for f in listdir(path) if isfile(join(path, f))]
+
+    fonts = []
+    for fl in files:
+        # print(fl)
+        sub = fl[1:]
+        sub = sub.split('.jpg')
+        fonts.append(sub[0])
 
 def MouseClick():
     # left mouse
@@ -159,8 +176,8 @@ def GetAllFontScreenshots():
     global _fontidx
     # This is for taking pic of all types of fonts of numbers
     if _screenshotFonts:
-        if (_fontidx < len(pygame.font.get_fonts())):
-            Globals._fontname = pygame.font.get_fonts()[_fontidx]
+        if (_fontidx < len(fonts)):
+            Globals._fontname = fonts[_fontidx]
             Globals._font = pygame.font.SysFont(Globals._fontname, 12)
             _fontidx = _fontidx + 1
             ScreenshotGrid()
