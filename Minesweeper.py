@@ -65,7 +65,7 @@ def Init():
     pygame.font.init()
     
     print("initalize globals")
-    Globals._fontname = "helvetica"
+    Globals._fontname = "times new roman"
     Globals._font = pygame.font.SysFont(Globals._fontname, 12)    
     Globals._screenshot = Screenshot.Screenshot(_screen)
 
@@ -86,13 +86,13 @@ def MainLoop():
         tick = _clock.tick(60)
 
         Update(tick)
+        Draw()
         MouseHover()
         Events()
         
         # Training
         GetAllFontScreenshots()
         GetColorTraining()
-        Draw()
         
         pygame.display.update()
     else:
@@ -167,13 +167,6 @@ def Run():
     while _running:
         MainLoop()
 
-def main():
-    Run()
-        
-if __name__ == "__main__":
-    main()
-    
-
 # functions below are for training a CNN
     
 def GetAllFontScreenshots():
@@ -206,3 +199,10 @@ def GetFontList():
         sub = fl[1:]
         sub = sub.split('.jpg')
         fonts.append(sub[0])
+
+def main():
+    Run()
+        
+if __name__ == "__main__":
+    main()
+    

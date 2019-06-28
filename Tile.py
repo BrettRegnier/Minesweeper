@@ -130,7 +130,7 @@ class Tile:
                 #left click
                 self.Reveal()
                 
-                Globals._gameover = self._mine
+                # Globals._gameover = self._mine
                 
                 # Test
                 # if (not self._mine):
