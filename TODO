@@ -5,6 +5,8 @@ Menu
 
 Need to raise an event that a tile has been clicked and then run the AI
 
-FOr the CNN
-Scrape the names of all the fonts I am currently using, and have them randomize in the tiles and save them for training
-I killed it man.
+
+Add a global definition of training tests so I don't need to manipulate many spots in code for training
+
+
+REFACTOR AT THE END

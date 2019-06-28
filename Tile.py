@@ -130,13 +130,18 @@ class Tile:
                 #left click
                 self.Reveal()
                 
+                Globals._gameover = self._mine
+                
                 # Test
                 # if (not self._mine):
                 # 	print(self._nearbyMines)
                 #
             elif (mtype == 1):
                 #right click
-                self._flagged = not self._flagged
+                self.Flag()
+    
+    def Flag(self):
+        self._flagged = not self._flagged
     
     def Reveal(self):
         self._revealed = True
@@ -154,12 +159,13 @@ class Tile:
                 tile.Reveal()
      
     def Screenshot(self):
-        if self._id < 9 and not self._id == 0:
-            Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
-            Globals._screenshot.Save(str(self._strid) + Globals._fontname, "./dataset/gameset/")
+        # For training fonts
+        # if self._id < 9 and not self._id == 0:
+        #     Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
+        #     Globals._screenshot.Save(str(self._strid) + Globals._fontname, "./dataset/training/" + str(self._id) + "/")
             
-        # Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
-        # Globals._screenshot.Save(str(self._id), "./dataset/gameset/")
+        Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
+        Globals._screenshot.Save(str(self._strid), "./dataset/gameset/")
     
     def RandomizeColor(self):
         self._colorTraining = True

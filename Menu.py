@@ -1,6 +1,6 @@
 import pygame
 import Globals
-import MenuItem
+import Button
 
 class Menu:
     def __init__(self, wWidth, wHeight, screen):
@@ -12,11 +12,17 @@ class Menu:
         self._height = 20
         
         self._items = []
-        newGame = MenuItem.MenuItem("New Game", 0, 0, screen)
-        help = MenuItem.MenuItem("Help", newGame.Right(), 0, screen)
         
-        self._items.append(newGame)
-        self._items.append(help)
+        def ngfunc():
+            Globals._gameover = True
+            
+        btnNewGame = Button.Button("New Game", 0, 0, screen, ngfunc)
+        
+        
+        btnHelp = Button.Button("Help", btnNewGame.Right(), 0, screen, ngfunc)
+        
+        self._items.append(btnNewGame)
+        self._items.append(btnHelp)
         
     def Update(self, tick):
         pass

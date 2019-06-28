@@ -6,3 +6,5 @@ global _fontname
 _fontname = ""
 global _screenshot
 _screenshot = None
+global _gameover
+_gameover = False

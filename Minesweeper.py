@@ -65,7 +65,7 @@ def Init():
     pygame.font.init()
     
     print("initalize globals")
-    Globals._fontname = "Times New Roman"
+    Globals._fontname = "helvetica"
     Globals._font = pygame.font.SysFont(Globals._fontname, 12)    
     Globals._screenshot = Screenshot.Screenshot(_screen)
 
@@ -78,21 +78,25 @@ def InitGame():
     h = int(_windowHeight - m*3)
     _grid = Grid.Grid(m, m*2, w, h, 2, _screen)
     _menu = Menu.Menu(_windowWidth, _windowHeight, _screen)
+    Globals._gameover = False
 
 def MainLoop():	
-    _screen.fill((240, 240, 240))
-    tick = _clock.tick(60)
+    if (Globals._gameover == False):
+        _screen.fill((240, 240, 240))
+        tick = _clock.tick(60)
 
-    Update(tick)
-    Draw()
-    
-    Events()
-    
-    # Training
-    GetAllFontScreenshots()
-    GetColorTraining()
-    
-    pygame.display.update()
+        Update(tick)
+        MouseHover()
+        Events()
+        
+        # Training
+        GetAllFontScreenshots()
+        GetColorTraining()
+        Draw()
+        
+        pygame.display.update()
+    else:
+        InitGame()
     
 def Events():
     global _running
@@ -116,6 +120,7 @@ def Events():
                 _mtype = 1
         elif event.type == pygame.MOUSEBUTTONUP:
             x, y = pygame.mouse.get_pos()
+            _menu.Click(x, y, 0)
             _grid.Click(x, y, _mtype)
         elif event.type == pygame.KEYDOWN:
             if (pygame.key.get_pressed()[pygame.K_g]):
@@ -138,30 +143,10 @@ def Events():
                 Globals._screenshot.CaptureWindow()
                 Globals._screenshot.Save("_Window", "./imgs/")
 
-def GetFontList():
-    # for training data
-    global fonts
-    from os import listdir
-    from os.path import isfile, join
-    path = 'fonts/'
-    files = [f for f in listdir(path) if isfile(join(path, f))]
 
-    fonts = []
-    for fl in files:
-        # print(fl)
-        sub = fl[1:]
-        sub = sub.split('.jpg')
-        fonts.append(sub[0])
-
-def MouseClick():
-    # left mouse
-    if pygame.mouse.get_pressed()[0]:
-        x, y = pygame.mouse.get_pos()
-        _grid.Click(x, y, 0)
-    # right mouse
-    elif pygame.mouse.get_pressed()[1]:
-        x, y = pygame.mouse.get_pos()
-        _grid.Click(x, y, 1)
+def MouseHover():
+    x, y = pygame.mouse.get_pos()
+    _menu.MouseHover(x, y)
 
 def Update(tick):
     _menu.Update(tick)
@@ -171,22 +156,6 @@ def Draw():
     # optional draw? So I can train a reinforcement network
     _menu.Draw()
     _grid.Draw()
-    
-def GetAllFontScreenshots():
-    global _fontidx
-    # This is for taking pic of all types of fonts of numbers
-    if _screenshotFonts:
-        if (_fontidx < len(fonts)):
-            Globals._fontname = fonts[_fontidx]
-            Globals._font = pygame.font.SysFont(Globals._fontname, 12)
-            _fontidx = _fontidx + 1
-            ScreenshotGrid()
-            
-def GetColorTraining():
-    global _screenshotRandomColors
-    if _screenshotRandomColors:
-        _grid.ChangeColors()
-        ScreenshotGrid()
 
 def ScreenshotGrid():
     _grid.Screenshot()
@@ -203,3 +172,37 @@ def main():
         
 if __name__ == "__main__":
     main()
+    
+
+# functions below are for training a CNN
+    
+def GetAllFontScreenshots():
+    global _fontidx
+    # This is for taking pic of all types of fonts of numbers
+    if _screenshotFonts:
+        if (_fontidx < len(fonts)):
+            Globals._fontname = fonts[_fontidx]
+            Globals._font = pygame.font.SysFont(Globals._fontname, 12)
+            _fontidx = _fontidx + 1
+            ScreenshotGrid()
+            
+def GetColorTraining():
+    global _screenshotRandomColors
+    if _screenshotRandomColors:
+        _grid.ChangeColors()
+        ScreenshotGrid() 
+    
+def GetFontList():
+    # for training data
+    global fonts
+    from os import listdir
+    from os.path import isfile, join
+    path = 'fonts/'
+    files = [f for f in listdir(path) if isfile(join(path, f))]
+
+    fonts = []
+    for fl in files:
+        # print(fl)
+        sub = fl[1:]
+        sub = sub.split('.jpg')
+        fonts.append(sub[0])

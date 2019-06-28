@@ -44,6 +44,8 @@ class Grid:
 
                 # For training
                 # self._tiles[count].OverrideValue(count)
+                # self._tiles[count].OverrideValue(0)
+                # self._tiles[count].Flag()
 
                 count = count + 1
 
@@ -51,7 +53,10 @@ class Grid:
             y = y + size
 
         toMakeMine = self._mines
-        # toMakeMine = 0
+        
+        # for making training data
+        # toMakeMine = 132
+        
         # make them mine
         while (toMakeMine > 0):
             tile = random.choice(self._tiles)
