@@ -81,6 +81,7 @@ class Network:
             test_image = np.expand_dims(test_image, axis=0)
             result = self._classifier.predict(test_image)
             
+            # TODO make this use the excepted class names that from the folders.
             # print(result)
             if result[0][0] == 1:
                 print(1)
