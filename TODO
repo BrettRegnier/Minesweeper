@@ -8,5 +8,10 @@ Need to raise an event that a tile has been clicked and then run the AI
 
 Add a global definition of training tests so I don't need to manipulate many spots in code for training
 
+Add an ingame cursor, so that I can see the cursor being used when in training/testing the RNN
+
+Add screenshotting to be captured but not saved, as to be passed into the CNN model
+Add a streamlined CNN model and use without having to reload it everytime.
 
 REFACTOR AT THE END
+
