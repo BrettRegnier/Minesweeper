@@ -6,6 +6,8 @@ import Menu
 
 import Screenshot
 
+import Models.tnr.TNR as Model
+
 global _screen #window
 global _clock
 global _running
@@ -19,6 +21,9 @@ global _GKey
 
 global _grid
 global _menu
+
+# AI
+global _model
 
 _screen = None
 _clock = None
@@ -49,7 +54,9 @@ _colorcount = 0
 def Init():
     global _screen
     global _clock
+    global _model
     
+    print("Initializing pygame")
     pygame.init()
     #logo
     #logo = pygame.image.load("logo.png")
@@ -64,7 +71,10 @@ def Init():
     
     pygame.font.init()
     
-    print("initalize globals")
+    print("Initializing AI")
+    _model = Model.Network()
+    
+    print("Initializing globals")
     Globals._fontname = "times new roman"
     Globals._font = pygame.font.SysFont(Globals._fontname, 12)    
     Globals._screenshot = Screenshot.Screenshot(_screen)
@@ -137,6 +147,7 @@ def Events():
                 _GKey = False
                 _SKey = False
                 ScreenshotGrid()
+                _model.Predict()
             if _SKey:
                 _SKey = False
                 _GKey = False
