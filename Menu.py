@@ -14,7 +14,7 @@ class Menu:
         self._items = []
         
         def ngfunc():
-            Globals._gameover = True
+            Globals._newgame = True
             
         btnNewGame = Button.Button("New Game", 0, 0, screen, ngfunc)
         

@@ -1,12 +1,20 @@
 Add different differentiating colors for the mines nearby
-Game over
-Reset
-Menu
+    1 - Black
+    2 - Green
+    3 - Orange
+    4 - Red
+    5 - Darker Red?
+    6 - Purple
+    7 - Pink
+    8 - Blue
+
+Should add click handler and keyboard handler
 
 Need to raise an event that a tile has been clicked and then run the AI
 
 
 Add a global definition of training tests so I don't need to manipulate many spots in code for training
+    -Including stopping the game from ending when a mine is hit
 
 Add an ingame cursor, so that I can see the cursor being used when in training/testing the RNN
 

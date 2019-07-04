@@ -8,3 +8,5 @@ global _screenshot
 _screenshot = None
 global _gameover
 _gameover = False
+global _newgame
+_newgame = False

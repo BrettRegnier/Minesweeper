@@ -55,7 +55,7 @@ class Grid:
         toMakeMine = self._mines
         
         # for making training data
-        # toMakeMine = 0
+        # toMakeMine = 100
         
         # make them mine
         while (toMakeMine > 0):

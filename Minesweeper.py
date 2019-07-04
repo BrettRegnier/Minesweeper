@@ -89,23 +89,26 @@ def InitGame():
     _grid = Grid.Grid(m, m*2, w, h, 2, _screen)
     _menu = Menu.Menu(_windowWidth, _windowHeight, _screen)
     Globals._gameover = False
+    
+    print("Ready to play")
 
 def MainLoop():	
-    if (Globals._gameover == False):
-        _screen.fill((240, 240, 240))
-        tick = _clock.tick(60)
+    _screen.fill((240, 240, 240))
+    tick = _clock.tick(60)
 
-        Update(tick)
-        Draw()
-        MouseHover()
-        Events()
-        
-        # Training
-        GetAllFontScreenshots()
-        GetColorTraining()
-        
-        pygame.display.update()
-    else:
+    Update(tick)
+    Draw()
+    MouseHover()
+    Events()
+    
+    # Training
+    GetAllFontScreenshots()
+    GetColorTraining()
+    
+    pygame.display.update()
+    
+    if Globals._newgame:
+        Globals._newgame = False
         InitGame()
     
 def Events():
@@ -131,7 +134,10 @@ def Events():
         elif event.type == pygame.MOUSEBUTTONUP:
             x, y = pygame.mouse.get_pos()
             _menu.Click(x, y, 0)
-            _grid.Click(x, y, _mtype)
+            
+            if (Globals._gameover == False):
+                # Only click if not game over
+                _grid.Click(x, y, _mtype)
         elif event.type == pygame.KEYDOWN:
             if (pygame.key.get_pressed()[pygame.K_g]):
                 _GKey = True
@@ -167,6 +173,14 @@ def Draw():
     # optional draw? So I can train a reinforcement network
     _menu.Draw()
     _grid.Draw()
+    
+    if (Globals._gameover):
+        Gameover()
+
+def Gameover():
+    # display gameover
+    textSurface = Globals._font.render(str("Game Over"), False, (0, 0, 0))
+    _screen.blit(textSurface, (_windowWidth/2 - 20, 25))
 
 def ScreenshotGrid():
     _grid.Screenshot()

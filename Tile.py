@@ -25,6 +25,7 @@ class Tile:
         self._innercolor = 200        
         self._revealedcolor = 180        
         self._outline = 100
+        self._textcolor = (0, 0, 0)
         
         # For training
         self._colorTraining = False
@@ -46,6 +47,23 @@ class Tile:
         for tile in self._adjacentTiles:
             if (tile is not None and tile.IsMine()):
                 self._nearbyMines = self._nearbyMines + 1
+                
+        # CNN struggles at seeing color for now.
+        # skipping == 1 because its default color.
+        # if self._nearbyMines == 2:
+        #     self._textcolor = (21, 31, 30)
+        # elif self._nearbyMines == 3:
+        #     self._textcolor = (210, 154, 109)
+        # elif self._nearbyMines == 4:
+        #     self._textcolor = (135, 61, 72)
+        # elif self._nearbyMines == 5:
+        #     self._textcolor = (25, 12, 14)
+        # elif self._nearbyMines == 6:
+        #     self._textcolor = (63, 48, 71)
+        # elif self._nearbyMines == 7:
+        #     self._textcolor = (140, 75, 92)        
+        # elif self._nearbyMines == 8:
+        #     self._textcolor = (53, 129, 184)
     
     def Draw(self):
         #border
@@ -68,6 +86,8 @@ class Tile:
                 b = random.randint(0,255)
                 pygame.draw.rect(self._screen, (r, g, b), (nx, ny, ns, ns))
         else:
+            #unrevealed tile
+            
             # decor
             ci = self._innercolor
             co = self._outercolor
@@ -102,7 +122,7 @@ class Tile:
             ns-4, ns-4))
         elif (self._revealed and self._nearbyMines > 0):
             # mines nearby
-            textSurface = Globals._font.render(str(self._nearbyMines), False, (0, 0, 0))
+            textSurface = Globals._font.render(str(self._nearbyMines), False, self._textcolor)
             self._screen.blit(textSurface, (self._x + 8, self._y + 5))
         
         # flag
@@ -130,12 +150,15 @@ class Tile:
                 #left click
                 self.Reveal()
                 
-                # Globals._gameover = self._mine
+                if (self._mine):
+                    Globals._gameover = True
+                    print("BOOM! Gameover")
+                    self.RevealAll()
                 
                 # Test
                 # if (not self._mine):
                 # 	print(self._nearbyMines)
-                #
+                
             elif (mtype == 1):
                 #right click
                 self.Flag()
@@ -169,4 +192,13 @@ class Tile:
     
     def RandomizeColor(self):
         self._colorTraining = True
+        
+    def RevealAll(self):
+        for tile in self._adjacentTiles:
+            if (tile is not None and not tile.Revealed()):
+                tile.ForceReveal()
+                
+    def ForceReveal(self):
+        self._revealed = True
+        self.RevealAll()
         
