@@ -51,9 +51,9 @@ class Tile:
         # CNN struggles at seeing color for now.
         # skipping == 1 because its default color.
         # if self._nearbyMines == 2:
-        #     self._textcolor = (21, 31, 30)
+        #     self._textcolor = (71, 92, 68)
         # elif self._nearbyMines == 3:
-        #     self._textcolor = (210, 154, 109)
+        #     self._textcolor = (226, 78, 27)
         # elif self._nearbyMines == 4:
         #     self._textcolor = (135, 61, 72)
         # elif self._nearbyMines == 5:
