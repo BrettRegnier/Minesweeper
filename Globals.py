@@ -10,3 +10,15 @@ global _gameover
 _gameover = False
 global _newgame
 _newgame = False
+global _colorsEnabled
+_colorsEnabled = False
+
+# For making training data
+global _MakeTrainingData
+_MakeTrainingData = True
+
+global _OverrideMineCount
+_OverrideMineCount = 0
+
+global _TestCount
+_TestCount = 0

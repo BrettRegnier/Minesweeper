@@ -75,9 +75,12 @@ def Init():
     _model = Model.Network()
     
     print("Initializing globals")
+    SetDefaultFont()
+    Globals._screenshot = Screenshot.Screenshot(_screen)
+
+def SetDefaultFont():
     Globals._fontname = "times new roman"
     Globals._font = pygame.font.SysFont(Globals._fontname, 12)    
-    Globals._screenshot = Screenshot.Screenshot(_screen)
 
 def InitGame():
     global _grid
@@ -196,6 +199,7 @@ def Run():
     
 def GetAllFontScreenshots():
     global _fontidx
+    global _screenshotFonts
     # This is for taking pic of all types of fonts of numbers
     if _screenshotFonts:
         if (_fontidx < len(fonts)):
@@ -203,6 +207,10 @@ def GetAllFontScreenshots():
             Globals._font = pygame.font.SysFont(Globals._fontname, 12)
             _fontidx = _fontidx + 1
             ScreenshotGrid()
+        else:
+            _screenshotFonts = False
+            _fontidx = 0
+            SetDefaultFont()
             
 def GetColorTraining():
     global _screenshotRandomColors

@@ -1,7 +1,7 @@
 import pygame
 import random
 import Tile
-
+import Globals
 
 class Grid:
     def __init__(self, x, y, width, height, difficulty, screen):
@@ -43,9 +43,10 @@ class Grid:
                 x = x + size
 
                 # For training
-                # self._tiles[count].OverrideValue(count)
-                # self._tiles[count].OverrideValue(0)
-                # self._tiles[count].Flag()
+                if (Globals._MakeTrainingData):
+                    self._tiles[count].OverrideValue(count)
+                    # self._tiles[count].OverrideValue(0)
+                    # self._tiles[count].Flag()
 
                 count = count + 1
 
@@ -55,7 +56,8 @@ class Grid:
         toMakeMine = self._mines
         
         # for making training data
-        # toMakeMine = 0
+        if (Globals._MakeTrainingData):
+            toMakeMine = Globals._OverrideMineCount
         
         # make them mine
         while (toMakeMine > 0):

@@ -1,4 +1,5 @@
 import pygame
+import os
 
 class Screenshot:
     def __init__(self, screen):
@@ -13,5 +14,7 @@ class Screenshot:
         self._img = self._screen
         
     def Save(self, name, path="./"):
+        if (not os.path.exists(path)):
+            os.makedirs(path)
         pygame.image.save(self._img, path + str(name) + ".jpg")
         print('saved')

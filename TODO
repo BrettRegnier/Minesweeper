@@ -21,5 +21,7 @@ Add an ingame cursor, so that I can see the cursor being used when in training/t
 Add screenshotting to be captured but not saved, as to be passed into the CNN model
 Add a streamlined CNN model and use without having to reload it everytime.
 
+Make the folders automatically generate themselves
+
 REFACTOR AT THE END
 

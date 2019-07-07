@@ -50,20 +50,21 @@ class Tile:
                 
         # CNN struggles at seeing color for now.
         # skipping == 1 because its default color.
-        # if self._nearbyMines == 2:
-        #     self._textcolor = (71, 92, 68)
-        # elif self._nearbyMines == 3:
-        #     self._textcolor = (226, 78, 27)
-        # elif self._nearbyMines == 4:
-        #     self._textcolor = (135, 61, 72)
-        # elif self._nearbyMines == 5:
-        #     self._textcolor = (25, 12, 14)
-        # elif self._nearbyMines == 6:
-        #     self._textcolor = (63, 48, 71)
-        # elif self._nearbyMines == 7:
-        #     self._textcolor = (140, 75, 92)        
-        # elif self._nearbyMines == 8:
-        #     self._textcolor = (53, 129, 184)
+        if (Globals._colorsEnabled):
+            if self._nearbyMines == 2:
+                self._textcolor = (71, 92, 68)
+            elif self._nearbyMines == 3:
+                self._textcolor = (226, 78, 27)
+            elif self._nearbyMines == 4:
+                self._textcolor = (135, 61, 72)
+            elif self._nearbyMines == 5:
+                self._textcolor = (25, 12, 14)
+            elif self._nearbyMines == 6:
+                self._textcolor = (63, 48, 71)
+            elif self._nearbyMines == 7:
+                self._textcolor = (140, 75, 92)        
+            elif self._nearbyMines == 8:
+                self._textcolor = (53, 129, 184)
     
     def Draw(self):
         #border
@@ -183,12 +184,24 @@ class Tile:
      
     def Screenshot(self):
         # For training fonts
-        # if self._id < 9 and not self._id == 0:
-        #     Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
-        #     Globals._screenshot.Save(str(self._strid) + Globals._fontname, "./dataset/training/" + str(self._id) + "/")
-            
-        Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
-        Globals._screenshot.Save(str(self._strid), "./dataset/gameset/")
+        if (Globals._MakeTrainingData):
+            if self._id < 9 and not self._id == 0:
+                path = None
+                if (Globals._TestCount < 10):
+                    # Training set
+                    path = "./dataset/test/" + str(self._id) + "/"
+                else:
+                    path = "./dataset/training/" + str(self._id) + "/"
+                    
+                if self._id == 8:
+                    Globals._TestCount = Globals._TestCount + 1
+                    
+                Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
+                Globals._screenshot.Save(str(self._strid) + Globals._fontname, path)
+                
+        else:
+            Globals._screenshot.Capture(self._x, self._y, self._size, self._size)
+            Globals._screenshot.Save(str(self._strid), "./dataset/gameset/")
     
     def RandomizeColor(self):
         self._colorTraining = True
