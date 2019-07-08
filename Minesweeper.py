@@ -16,9 +16,6 @@ global _windowHeight
 
 global _mtype
 
-global _SKey
-global _GKey
-
 global _grid
 global _menu
 
@@ -33,9 +30,6 @@ _windowWidth = 280
 _windowHeight = 280
 
 _mtype = 0
-
-_SKey = False
-_GKey = False
 
 _grid = None
 _menu = None
@@ -141,28 +135,30 @@ def Events():
             if (Globals._gameover == False):
                 # Only click if not game over
                 _grid.Click(x, y, _mtype)
-        elif event.type == pygame.KEYDOWN:
-            if (pygame.key.get_pressed()[pygame.K_g]):
-                _GKey = True
-            elif (pygame.key.get_pressed()[pygame.K_s]):
-                _SKey = True
-            elif (pygame.key.get_pressed()[pygame.K_p]):
-                GetFontList()
-                _screenshotFonts = True
-            elif (pygame.key.get_pressed()[pygame.K_l]):
-                _screenshotRandomColors = True
         elif event.type == pygame.KEYUP:
-            if _GKey:
-                _GKey = False
-                _SKey = False
-                ScreenshotGrid()
-                _model.Predict()
-            if _SKey:
-                _SKey = False
-                _GKey = False
-                Globals._screenshot.CaptureWindow()
-                Globals._screenshot.Save("_Window", "./imgs/")
-
+            if Globals._MakeTrainingData == False:
+                if event.key == pygame.K_g:
+                    ScreenshotGrid()
+                    _model.Predict()
+                elif event.key == pygame.K_s:
+                    Globals._screenshot.CaptureWindow()
+                    Globals._screenshot.Save("_Window", "./imgs/")
+                elif event.key == pygame.K_p:
+                    GetFontList()
+                    _screenshotFonts = True
+                elif event.key == pygame.K_l:
+                    _screenshotRandomColors = True
+            else:
+                print("In training mode can't screenshot normally.")
+            if event.key == pygame.K_t:
+                # Training mode.
+                Globals._MakeTrainingData = not Globals._MakeTrainingData
+                Globals._newgame = True
+                
+                if Globals._MakeTrainingData:
+                    print("Training Mode enabled")
+                else:
+                    print("Training Mode disabled")
 
 def MouseHover():
     x, y = pygame.mouse.get_pos()

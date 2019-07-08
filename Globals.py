@@ -15,7 +15,7 @@ _colorsEnabled = False
 
 # For making training data
 global _MakeTrainingData
-_MakeTrainingData = True
+_MakeTrainingData = False
 
 global _OverrideMineCount
 _OverrideMineCount = 0
