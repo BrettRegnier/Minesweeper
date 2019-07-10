@@ -28,7 +28,7 @@ class Grid:
         # first tile
         x = 0
         y = 0
-        size = 20
+        size = 32
         self._tiles = []
 
         rows = int(self._height / size)

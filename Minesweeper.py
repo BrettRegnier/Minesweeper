@@ -26,8 +26,8 @@ _screen = None
 _clock = None
 _running = True
 
-_windowWidth = 280
-_windowHeight = 280
+_windowWidth = 424
+_windowHeight = 444
 
 _mtype = 0
 
@@ -44,6 +44,9 @@ _screenshotFonts = False
 _fontidx = 0
 _screenshotRandomColors = False
 _colorcount = 0
+
+global FPS
+FPS = 60
 
 def Init():
     global _screen
@@ -74,7 +77,7 @@ def Init():
 
 def SetDefaultFont():
     Globals._fontname = "times new roman"
-    Globals._font = pygame.font.SysFont(Globals._fontname, 12)    
+    Globals._font = pygame.font.SysFont(Globals._fontname, 24)    
 
 def InitGame():
     global _grid
@@ -91,7 +94,7 @@ def InitGame():
 
 def MainLoop():	
     _screen.fill((240, 240, 240))
-    tick = _clock.tick(60)
+    tick = _clock.tick(FPS)
 
     Update(tick)
     Draw()
@@ -113,6 +116,7 @@ def Events():
     global _mtype
     global _GKey
     global _SKey
+    global FPS
     
     # training
     global _screenshotFonts
@@ -143,13 +147,15 @@ def Events():
                 elif event.key == pygame.K_s:
                     Globals._screenshot.CaptureWindow()
                     Globals._screenshot.Save("_Window", "./imgs/")
-                elif event.key == pygame.K_p:
-                    GetFontList()
-                    _screenshotFonts = True
                 elif event.key == pygame.K_l:
                     _screenshotRandomColors = True
             else:
                 print("In training mode can't screenshot normally.")
+                if event.key == pygame.K_p:
+                    GetFontList()
+                    _screenshotFonts = True
+                    # FPS = 1
+                
             if event.key == pygame.K_t:
                 # Training mode.
                 Globals._MakeTrainingData = not Globals._MakeTrainingData
@@ -179,7 +185,7 @@ def Draw():
 def Gameover():
     # display gameover
     textSurface = Globals._font.render(str("Game Over"), False, (0, 0, 0))
-    _screen.blit(textSurface, (_windowWidth/2 - 20, 25))
+    # _screen.blit(textSurface, (_windowWidth/2 - 20, 25))
 
 def ScreenshotGrid():
     _grid.Screenshot()
@@ -200,9 +206,12 @@ def GetAllFontScreenshots():
     if _screenshotFonts:
         if (_fontidx < len(fonts)):
             Globals._fontname = fonts[_fontidx]
-            Globals._font = pygame.font.SysFont(Globals._fontname, 12)
+            # Globals._fontname = "hypmokgakbold"
+            Globals._font = pygame.font.SysFont(Globals._fontname, 24)
+            
             _fontidx = _fontidx + 1
             ScreenshotGrid()
+            print(Globals._fontname)
         else:
             _screenshotFonts = False
             _fontidx = 0

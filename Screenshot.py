@@ -1,6 +1,8 @@
 import pygame
 import os
 
+import Globals
+
 class Screenshot:
     def __init__(self, screen):
         self._img = None
@@ -17,4 +19,6 @@ class Screenshot:
         if (not os.path.exists(path)):
             os.makedirs(path)
         pygame.image.save(self._img, path + str(name) + ".jpg")
-        print('saved')
+        
+        if (not Globals._MakeTrainingData):
+            print('saved tile ' + str(name))

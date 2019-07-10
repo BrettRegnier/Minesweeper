@@ -15,14 +15,14 @@ class Network:
         # Initialize the CNN
         self._classifier = Sequential()
 
-        self._classifier.add(Conv2D(128, (3, 1), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
-        self._classifier.add(MaxPooling2D(pool_size=(2, 2)))
+        self._classifier.add(Conv2D(100, (3, 1), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
+        self._classifier.add(MaxPooling2D(pool_size=(3, 3))) #try again with this config
 
         self._classifier.add(Flatten())
 
         # Full connection
-        self._classifier.add(Dense(units = 256, activation='relu'))
-        self._classifier.add(Dense(units = 64, activation='relu'))
+        self._classifier.add(Dense(units = 200, activation='relu'))
+        self._classifier.add(Dense(units = 50, activation='relu'))
         self._classifier.add(Dense(units = 12, activation='softmax'))
 
         # Compile CNN

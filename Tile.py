@@ -124,7 +124,7 @@ class Tile:
         elif (self._revealed and self._nearbyMines > 0):
             # mines nearby
             textSurface = Globals._font.render(str(self._nearbyMines), False, self._textcolor)
-            self._screen.blit(textSurface, (self._x + 8, self._y + 5))
+            self._screen.blit(textSurface, (self._x + 10, self._y + 5))
         
         # flag
         if (self._flagged and not self._revealed):
@@ -142,7 +142,8 @@ class Tile:
         
     def Update(self, tick):
         #animation stuff here.
-        pass
+        if (Globals._gameover and not self._revealed):
+            self.RevealSelf()
         
     def Click(self, mx, my, mtype):
         if (mx > self._x  and mx < self._x + self._size and 
@@ -154,7 +155,6 @@ class Tile:
                 if (self._mine):
                     Globals._gameover = True
                     print("BOOM! Gameover")
-                    self.RevealAll()
                 
                 # Test
                 # if (not self._mine):
@@ -166,6 +166,9 @@ class Tile:
     
     def Flag(self):
         self._flagged = not self._flagged
+    
+    def RevealSelf(self):
+        self._revealed = True
     
     def Reveal(self):
         self._revealed = True
@@ -205,13 +208,3 @@ class Tile:
     
     def RandomizeColor(self):
         self._colorTraining = True
-        
-    def RevealAll(self):
-        for tile in self._adjacentTiles:
-            if (tile is not None and not tile.Revealed()):
-                tile.ForceReveal()
-                
-    def ForceReveal(self):
-        self._revealed = True
-        self.RevealAll()
-        
