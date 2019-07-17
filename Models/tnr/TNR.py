@@ -15,14 +15,16 @@ class Network:
         # Initialize the CNN
         self._classifier = Sequential()
 
-        self._classifier.add(Conv2D(100, (3, 1), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
-        self._classifier.add(MaxPooling2D(pool_size=(3, 3))) #try again with this config
+        self._classifier.add(Conv2D(128, (3, 1), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
+        self._classifier.add(MaxPooling2D(pool_size=(3, 3)))
+        self._classifier.add(Conv2D(64, (3, 1), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
+        self._classifier.add(MaxPooling2D(pool_size=(2, 2)))
 
         self._classifier.add(Flatten())
 
         # Full connection
-        self._classifier.add(Dense(units = 200, activation='relu'))
-        self._classifier.add(Dense(units = 50, activation='relu'))
+        self._classifier.add(Dense(units = 256, activation='sigmoid'))
+        self._classifier.add(Dense(units = 64, activation='sigmoid'))
         self._classifier.add(Dense(units = 12, activation='softmax'))
 
         # Compile CNN
@@ -54,7 +56,7 @@ class Network:
         self._classifier.fit_generator(
             training_set,
             steps_per_epoch=2000,
-            epochs=3,
+            epochs=10,
             validation_data=test_set,
             validation_steps=400)
             
@@ -83,27 +85,31 @@ class Network:
             
             # TODO make this use the expected class names that from the folders.
             # print(result)
-            if result[0][0] == 1:
-                print(1)
-            elif result[0][1] == 1:
-                print(2)
-            elif result[0][2] == 1:
-                print(3)
-            elif result[0][3] == 1:
-                print(4)
-            elif result[0][4] == 1:
-                print(5)
-            elif result[0][5] == 1:
-                print(6)
-            elif result[0][6] == 1:
-                print(7)
-            elif result[0][7] == 1:
-                print(8)
-            elif result[0][8] == 1:
-                print('flagged')
-            elif result[0][9] == 1:
-                print('mine')
-            elif result[0][10] == 1:
-                print('revealed')
-            elif result[0][11] == 1:
-                print('unrevealed')
+            if result[0][0] > 0.5:
+                print("1, probability: " + str(result[0][0]))
+            elif result[0][1] > 0.5:
+                print("2, probability: " + str(result[0][1]))
+            elif result[0][2] > 0.5:
+                print("3, probability: " + str(result[0][2]))
+            elif result[0][3] > 0.5:
+                print("4, probability: " + str(result[0][3]))
+            elif result[0][4] > 0.5:
+                print("5, probability: " + str(result[0][4]))
+            elif result[0][5] > 0.5:
+                print("6, probability: " + str(result[0][5]))
+            elif result[0][6] > 0.5:
+                print("7, probability: " + str(result[0][6]))
+            elif result[0][7] > 0.5:
+                print("8, probability: " + str(result[0][7]))
+            elif result[0][8] > 0.5:
+                print("flagged, probability: " + str(result[0][8]))
+            elif result[0][9] > 0.5:
+                print("mine, probability: " + str(result[0][9]))                
+            elif result[0][10] > 0.5:
+                print("revealed, probability: " + str(result[0][10]))                
+            elif result[0][11] > 0.5:
+                print("unrevealed, probability: " + str(result[0][11]))                
+                
+if __name__ == "__main__":
+    model = Network()
+    model.Predict()

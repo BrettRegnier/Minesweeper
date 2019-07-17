@@ -11,7 +11,7 @@ _gameover = False
 global _newgame
 _newgame = False
 global _colorsEnabled
-_colorsEnabled = False
+_colorsEnabled = True
 
 # For making training data
 global _MakeTrainingData
