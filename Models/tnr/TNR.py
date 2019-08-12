@@ -28,7 +28,7 @@ class Network:
         self._classifier.add(Dense(units = 12, activation='softmax'))
 
         # Compile CNN
-        self._classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+        self._classifier.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
 
     def Train(self):
         # Fitting the CNN to` the images
