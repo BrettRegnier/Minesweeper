@@ -8,16 +8,17 @@ from keras.layers import BatchNormalization
 from keras.layers import Dropout
 import os
 
-class Network:
+# TODO rewrite this whole class
+class NumberClassifier:
     def __init__(self):
         self._image_size = 32
 
         # Initialize the CNN
         self._classifier = Sequential()
 
-        self._classifier.add(Conv2D(128, (3, 1), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
+        self._classifier.add(Conv2D(128, (3, 3), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
         self._classifier.add(MaxPooling2D(pool_size=(3, 3)))
-        self._classifier.add(Conv2D(64, (3, 1), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
+        self._classifier.add(Conv2D(64, (3, 3), input_shape=(self._image_size, self._image_size, 3), activation="relu"))
         self._classifier.add(MaxPooling2D(pool_size=(2, 2)))
 
         self._classifier.add(Flatten())
