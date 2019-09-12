@@ -25,3 +25,5 @@ Make the folders automatically generate themselves
 
 REFACTOR AT THE END
 
+CONSIDER -- Just making a minesweeper class, and having a abstracted gym env so
+    that I can skip over all of the other stuff if I just want to run the game.

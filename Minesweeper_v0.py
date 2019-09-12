@@ -2,6 +2,7 @@ import random
 import gym
 import numpy as np 
 import math
+from gym import spaces
 
 import pygame
 import Globals
