@@ -98,7 +98,7 @@ class Minesweeper_v0(gym.Env):
         
         print("Ready to play")
         
-    def SetDefaultFont():
+    def SetDefaultFont(self):
         Globals._fontname = "times new roman"
         Globals._font = pygame.font.SysFont(Globals._fontname, 24)
         

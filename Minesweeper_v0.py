@@ -99,7 +99,7 @@ class Minesweeper_v0(gym.Env):
         
         print("Ready to play")
         
-    def SetDefaultFont():
+    def SetDefaultFont(self):
         Globals._fontname = "times new roman"
         Globals._font = pygame.font.SysFont(Globals._fontname, 24)
         
@@ -117,13 +117,24 @@ class Minesweeper_v0(gym.Env):
         # Experimental stuff that doesn't need to be added.
         
     def Update(self, tick):
-        pass
+        _menu.Update(tick)
+        _grid.Update(tick)
         
-    def Draw(self):
-        pass
+    def Draw(self):    
+        _menu.Draw()
+        _grid.Draw()
+    
+        if (Globals._gameover):
+            Gameover()
         
     def MouseHover(self):
-        pass
+        x, y = pygame.mouse.get_pos()
+        _menu.MouseHover(x, y)
         
     def Events(self):
         pass
+    
+    def Gameover(self):
+        # display gameover
+        textSurface = Globals._font.render(str("Game Over"), False, (0, 0, 0))
+        # _screen.blit(textSurface, (_windowWidth/2 - 20, 25))
