@@ -20,6 +20,7 @@ class Tile:
         
         self._revealed = False
         self._flagged = False
+        self._state = -1
         
         self._outercolor = 255
         self._innercolor = 200        
@@ -142,7 +143,7 @@ class Tile:
         
     def Update(self, tick):
         #animation stuff here.
-        if (Globals._gameover and not self._revealed):
+        if (Globals.IsGameOver() == True and not self._revealed):
             self.RevealSelf()
         
     def Click(self, mx, my, mtype):
@@ -152,8 +153,11 @@ class Tile:
                 #left click
                 self.Reveal()
                 
+                self._state = self._nearbyMines
+                
                 if (self._mine):
-                    Globals._gameover = True
+                    Globals._gameover = 2
+                    self._state = -2
                     print("BOOM! Gameover")
                 
                 # Test

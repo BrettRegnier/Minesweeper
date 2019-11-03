@@ -8,6 +8,8 @@ Add different differentiating colors for the mines nearby
     7 - Pink
     8 - Blue
 
+Add a cursor class, so I can move my mouse without the game having control of my mouse
+
 Should add click handler and keyboard handler
 
 Need to raise an event that a tile has been clicked and then run the AI
@@ -27,3 +29,4 @@ REFACTOR AT THE END
 
 CONSIDER -- Just making a minesweeper class, and having a abstracted gym env so
     that I can skip over all of the other stuff if I just want to run the game.
+    

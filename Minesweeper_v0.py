@@ -10,21 +10,69 @@ from Grid import Grid
 from Menu import Menu
 from Screenshot import Screenshot
 
+import time
+
 
 class Minesweeper_v0(gym.Env):
     def __init__(self):
         super(Minesweeper_v0, self).__init__()
         self.Init()
         self.InitGame()
+        
+        self._steps = 0
+        
+        self._observationSpace = spaces.Box(low=0, high=9, shape=(1,144), dtype=np.int32)
+        self._actionSpace = spaces.Discrete(144)
 
     def step(self, action):
-        pass
+        self._steps += 1
+        
+        # Make a decision 
+        # quick math, this will allow for both the version that can see the game data and the one that cannot.
+        size = 32
+        xmargin = 20
+        ymargin = 40
+        
+        x = xmargin + size/2 + (action % 12) * size
+        y = ymargin + size/2 + int(action / 12) * size
+        # time.sleep(2)
+        
+        # pygame.mouse.set_pos(x, y)
+        self._grid.Click(x, y, 0)
+        
+        # update the game after the decision.
+        tick = self._clock.tick(self._fps)
+        self.Update(tick)
+        
+        # reward 
+        reward = 0
+        done = False
+        if Globals._gameover == 1:
+            reward = -1
+            done = True
+        elif Globals._gameover == 2:
+            reward = 1
+            done = True
+        
+        # unrevealed = -1
+        # revealed & empty = 0
+        # bomb = -2
+        # tile number = ##
+        # get state after action
+        state = self._state
+        
+        
+        print(action, "x:", x, "y:", y, "reward", reward, "done", done)
+        
+        return state, reward, done, {}
 
     def reset(self):
-        pass
+        self.InitGame()
+        
+        return self._state
 
     def render(self, mode="human", close=False):
-        if mode == "human":
+        if (mode == "human"):
             self.Render()
 
     # Game logic below
@@ -97,7 +145,8 @@ class Minesweeper_v0(gym.Env):
         h = int(self._windowHeight - m*2)
         self._grid = Grid(m, m*2, w, h, 2, self._screen)
         self._menu = Menu(self._windowWidth, self._windowHeight, self._screen)
-        Globals._gameover = False
+        Globals._gameover = 0        
+        self._state = self._grid._state
 
         print("Ready to play")
 
@@ -106,29 +155,28 @@ class Minesweeper_v0(gym.Env):
         Globals._font = pygame.font.SysFont(Globals._fontname, 24)
 
     # Begin game logic #
-
+    
+    # Display the game
     def Render(self):
         self._screen.fill((240, 240, 240))
-        tick = self._clock.tick(self._fps)
-
-        self.Update(tick)
+        
         self.Draw()
         self.MouseHover()
         self.Events()
         
         pygame.display.update()
 
-        # Experimental stuff that doesn't need to be added.
-
     def Update(self, tick):
         self._menu.Update(tick)
         self._grid.Update(tick)
+        
+        self._state = self._grid._state
 
     def Draw(self):
         self._menu.Draw()
         self._grid.Draw()
 
-        if (Globals._gameover):
+        if (Globals.IsGameOver()):
             self.Gameover()
 
     def MouseHover(self):
@@ -143,16 +191,17 @@ class Minesweeper_v0(gym.Env):
                 self._running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if (pygame.mouse.get_pressed()[0]):
-                    self._mtype = 0
+                    self._mtype = 0 # left click
                 elif (pygame.mouse.get_pressed()[2]):
-                    self._mtype = 1
+                    self._mtype = 1 # right click
             elif event.type == pygame.MOUSEBUTTONUP:
                 x, y = pygame.mouse.get_pos()
                 self._menu.Click(x, y, 0)
 
-                if (Globals._gameover == False):
+                if (Globals.IsGameOver() == False):
                     # Only click if not game over
-                    self._grid.Click(x, y, _mtype)
+                    self._grid.Click(x, y, self._mtype)
+                    print(x, y)
             elif event.type == pygame.KEYUP:
                 if Globals._MakeTrainingData == False:
                     if event.key == pygame.K_g:
@@ -181,6 +230,9 @@ class Minesweeper_v0(gym.Env):
                         print("Training Mode disabled")
 
     def Gameover(self):
+        pass
         # display gameover
-        textSurface = Globals._font.render(str("Game Over"), False, (0, 0, 0))
-        # _screen.blit(textSurface, (_windowWidth/2 - 20, 25))
+        # if Globals.IsLose():
+        #     textSurface = Globals._font.render(str("Game Over."), False, (0, 0, 0))
+        # elif Globals.IsWin():            
+        #     textSurface = Globals._font.render(str("Victory!"), False, (0, 0, 0))

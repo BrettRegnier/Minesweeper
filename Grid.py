@@ -21,6 +21,7 @@ class Grid:
         self._height = height
         
         self._screen = screen
+        self._state = []
 
         self.Build()
 
@@ -47,7 +48,7 @@ class Grid:
                     self._tiles[count].OverrideValue(count)
                     # self._tiles[count].OverrideValue(0)
                     # self._tiles[count].Flag()
-
+                self._state.append(-1) # set the state to be all unrevealed
                 count = count + 1
 
             x = 0
@@ -154,9 +155,20 @@ class Grid:
             self._tiles[i].AdjacentTiles(adj)
 
     def Update(self, tick):
+        victory = True
+        i = 0
         # animations?
+        
         for tile in self._tiles:
             tile.Update(tick)
+            
+            self._state[i] = tile._state
+            i += 1
+            
+            if tile._revealed == False and tile._mine == False:
+                victory = False
+        if victory:
+            Globals._gameover = 1
 
     def Draw(self):
         # draw tiles

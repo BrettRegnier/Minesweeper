@@ -7,6 +7,8 @@ import Menu
 import Screenshot
 
 import Models.tnr.TNR as Model
+import Minesweeper_v0
+import Broom
 
 global _screen #window
 global _clock
@@ -238,13 +240,11 @@ def GetFontList():
         sub = sub.split('.jpg')
         fonts.append(sub[0])
 
-import Minesweeper_v0
 def main():
     # Run()
     ms = Minesweeper_v0.Minesweeper_v0()
-    while True:
-        ms.render()
-    
+    broom = Broom.Broom(ms)
+    broom.Train(10000, 1)
         
 if __name__ == "__main__":
     main()
