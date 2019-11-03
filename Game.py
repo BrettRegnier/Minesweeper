@@ -238,8 +238,13 @@ def GetFontList():
         sub = sub.split('.jpg')
         fonts.append(sub[0])
 
+import Minesweeper_v0
 def main():
-    Run()
+    # Run()
+    ms = Minesweeper_v0.Minesweeper_v0()
+    while True:
+        ms.render()
+    
         
 if __name__ == "__main__":
     main()
