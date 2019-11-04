@@ -143,7 +143,7 @@ class Tile:
         
     def Update(self, tick):
         #animation stuff here.
-        if (Globals.IsGameOver() == True and not self._revealed):
+        if (Globals._gameover == True and not self._revealed):
             self.RevealSelf()
         
     def Click(self, mx, my, mtype):
@@ -156,7 +156,7 @@ class Tile:
                 self._state = self._nearbyMines
                 
                 if (self._mine):
-                    Globals._gameover = 2
+                    Globals._gameover = True
                     self._state = -2
                     print("BOOM! Gameover")
                 

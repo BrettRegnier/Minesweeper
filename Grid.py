@@ -19,6 +19,7 @@ class Grid:
         self._y = y
         self._width = width
         self._height = height
+        self._unrevealedCount = 0
         
         self._screen = screen
         self._state = []
@@ -157,13 +158,15 @@ class Grid:
     def Update(self, tick):
         victory = True
         i = 0
-        # animations?
+        self._unrevealedCount = 0
         
         for tile in self._tiles:
             tile.Update(tick)
             
             self._state[i] = tile._state
             i += 1
+            if tile._revealed == False:           
+                self._unrevealedCount += 1
             
             if tile._revealed == False and tile._mine == False:
                 victory = False
