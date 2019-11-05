@@ -44,10 +44,6 @@ class Minesweeper_v0(gym.Env):
         # update the game after the decision.
         self.Update()
 
-        if (self._steps == 100):
-            Globals._win = True
-            Globals._gameover = True
-
         # reward
         reward = -1
         done = False
@@ -117,6 +113,7 @@ class Minesweeper_v0(gym.Env):
         self._screenshotRandomColours = False
         # I don't know right now
         self._colourcount = 0
+        self._quit = None;
 
     def InitGame(self):
         print("Initializing Minesweeper")
@@ -234,6 +231,7 @@ class Minesweeper_v0(gym.Env):
                         print("Training Mode enabled")
                     else:
                         print("Training Mode disabled")
+                
 
     def Gameover(self):
         # display gameover

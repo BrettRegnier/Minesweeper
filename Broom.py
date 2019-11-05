@@ -21,8 +21,8 @@ class Broom:
 		self._trained = False
 		self.CreateModel()
 
-		# if load:
-		# 	self.Load(name)
+		if load:
+			self.Load(name)
 
 	def CreateModel(self):
 		nb_actions = self._env._actionSpace.n
@@ -31,7 +31,7 @@ class Broom:
 		policy = BoltzmannQPolicy()
 		self._model = Sequential()
 		self._model.add(Flatten(input_shape=nb_inputs))
-		self._model.add(Dense(units=288, activation='relu'))
+		self._model.add(Dense(units=288, activation='tanh'))
 		self._model.add(Dense(units=144, activation='relu'))
 		self._model.add(Dense(units=144, activation='relu'))
 		self._model.add(Dense(units=nb_actions, activation='linear'))
