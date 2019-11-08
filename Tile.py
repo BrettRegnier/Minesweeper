@@ -15,7 +15,6 @@ class Tile:
         
         self._mine = False
         
-        # tuple of adjacentTiles
         self._nearbyMines = 0
         
         self._revealed = False
@@ -24,7 +23,7 @@ class Tile:
         
         self._outercolor = 255
         self._innercolor = 200        
-        self._revealedcolor = 180        
+        self._revealedcolor = 180
         self._outline = 100
         self._textcolor = (0, 0, 0)
         
@@ -147,18 +146,22 @@ class Tile:
             self.RevealSelf()
         
     def Click(self, mx, my, mtype):
+        clickrevealed = False
         if (mx > self._x  and mx < self._x + self._size and 
         my > self._y and my < self._y + self._size):
             if (mtype == 0 and self._revealed == False):
                 #left click
                 self.Reveal()
+                clickrevealed = True
                 
                 self._state = self._nearbyMines
                 
                 if (self._mine):
                     Globals._gameover = True
+                    Globals._win = False
                     self._state = -2
                     print("BOOM! Gameover")
+                
                 
                 # Test
                 # if (not self._mine):
@@ -167,6 +170,8 @@ class Tile:
             elif (mtype == 1):
                 #right click
                 self.Flag()
+                
+        return clickrevealed
     
     def Flag(self):
         self._flagged = not self._flagged
@@ -188,6 +193,11 @@ class Tile:
         for tile in self._adjacentTiles:
             if (tile is not None and not tile.Revealed()):
                 tile.Reveal()
+                
+    def Reset(self):
+        self._revealed = False
+        self._flagged = False
+        self._state = -1
      
     def Screenshot(self):
         # For training fonts

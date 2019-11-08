@@ -7,7 +7,7 @@ def main():
     #     ms.Update()
     #     ms.Render()
     broom = Broom.Broom(ms)
-    broom.Train(1000000, 1)
+    broom.Train(20000)
         
 if __name__ == "__main__":
     main()

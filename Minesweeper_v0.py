@@ -24,6 +24,10 @@ class Minesweeper_v0(gym.Env):
         self._observationSpace = spaces.Box(
             low=0, high=9, shape=(1, 144), dtype=np.int32)
         self._actionSpace = spaces.Discrete(144)
+        
+        self._wins = 0
+        self._prevwins = 0
+        self._loses = 0
 
     def step(self, action):
         self._steps += 1
@@ -39,20 +43,25 @@ class Minesweeper_v0(gym.Env):
         # time.sleep(2)
 
         # pygame.mouse.set_pos(x, y)
-        self._grid.Click(x, y, 0)
+        revealed = self._grid.Click(x, y, 0)
 
         # update the game after the decision.
         self.Update()
 
         # reward
         reward = -1
+        if revealed:
+            reward = 1
+        
         done = False
         if Globals._gameover == True and Globals._win == True:
-            reward = 1000
+            reward = 10
             done = True
+            self._wins += 1
         elif Globals._gameover == True:
-            reward -= 10
+            reward = -10
             done = True
+            self._loses += 1
 
         # unrevealed = -1
         # revealed & empty = 0
@@ -66,7 +75,12 @@ class Minesweeper_v0(gym.Env):
         return state, reward, done, {}
 
     def reset(self):
-        self.InitGame()
+        if self._wins % 10 == 0 and self._wins > self._prevwins:
+            self.ResetGame(True)
+            self._prevwins = self._wins
+        else:            
+            self.ResetGame(False)
+        print ("loses:", self._loses, "wins:", self._wins) 
 
         return self._state
 
@@ -113,7 +127,7 @@ class Minesweeper_v0(gym.Env):
         self._screenshotRandomColours = False
         # I don't know right now
         self._colourcount = 0
-        self._quit = None;
+        self._quit = None
 
     def InitGame(self):
         print("Initializing Minesweeper")
@@ -145,12 +159,19 @@ class Minesweeper_v0(gym.Env):
         h = int(self._windowHeight - m*2)
         self._grid = Grid(m, m*2, w, h, 1, self._screen)
         self._menu = Menu(self._windowWidth, self._windowHeight, self._screen)
+        self._state = self._grid._state
+        
         Globals._gameover = False
         Globals._win = False
 
-        self._state = self._grid._state
-
         print("Ready to play")
+    
+    def ResetGame(self, hard):
+        self._grid.Reset(hard)
+        self._state = self._grid._state       
+        
+        Globals._gameover = False
+        Globals._win = False
 
     def SetDefaultFont(self):
         Globals._fontname = "times new roman"

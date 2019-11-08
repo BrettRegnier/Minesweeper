@@ -22,7 +22,6 @@ class Grid:
         self._unrevealedCount = 0
         
         self._screen = screen
-        self._state = []
 
         self.Build()
 
@@ -32,6 +31,7 @@ class Grid:
         y = 0
         size = 32
         self._tiles = []
+        self._state = []
 
         rows = int(self._height / size)
         columns = int(self._width / size)
@@ -170,8 +170,11 @@ class Grid:
             
             if tile._revealed == False and tile._mine == False:
                 victory = False
+            if tile._revealed and tile._mine:
+                victory = False
         if victory:
-            Globals._gameover = 1
+            Globals._gameover = True
+            Globals._win = True
 
     def Draw(self):
         # draw tiles
@@ -179,10 +182,23 @@ class Grid:
             tile.Draw()
 
     def Click(self, mx, my, mtype):
+        clickrevealed = False
         for tile in self._tiles:
             if (mx > self._x and mx < self._x + self._width and
                     my > self._y and my < self._y + self._height):
-                tile.Click(mx, my, mtype)
+                clickrevealed = tile.Click(mx, my, mtype)
+                if clickrevealed:
+                    break
+        return clickrevealed
+    
+    def Reset(self, hard):
+        self._unrevealedCount = 0
+        
+        if hard:
+            self.Build()
+        else:
+            for tile in self._tiles:
+                tile.Reset()
 
     def Screenshot(self):
         for tile in self._tiles:

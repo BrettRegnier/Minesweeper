@@ -1,14 +1,5 @@
-Add different differentiating colors for the mines nearby
-    1 - Black
-    2 - Green
-    3 - Orange
-    4 - Red
-    5 - Darker Red?
-    6 - Purple
-    7 - Pink
-    8 - Blue
-
 Add a cursor class, so I can move my mouse without the game having control of my mouse
+Add an ingame cursor, so that I can see the cursor being used when in training/testing the RNN
 
 Should add click handler and keyboard handler
 
@@ -17,8 +8,6 @@ Need to raise an event that a tile has been clicked and then run the AI
 
 Add a global definition of training tests so I don't need to manipulate many spots in code for training
     -Including stopping the game from ending when a mine is hit
-
-Add an ingame cursor, so that I can see the cursor being used when in training/testing the RNN
 
 Add screenshotting to be captured but not saved, as to be passed into the CNN model
 Add a streamlined CNN model and use without having to reload it everytime.
@@ -30,3 +19,6 @@ REFACTOR AT THE END
 CONSIDER -- Just making a minesweeper class, and having a abstracted gym env so
     that I can skip over all of the other stuff if I just want to run the game.
     
+Note:
+    Made this change to my core.py of keras-rl
+    https://github.com/keras-rl/keras-rl/issues/161

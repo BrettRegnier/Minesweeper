@@ -11,6 +11,7 @@ from rl.memory import SequentialMemory
 
 import Globals
 
+
 class Broom:
 	def __init__(self, env, name='Broom.h5', load=True, memory=20000):
 		self._env = env
@@ -31,13 +32,13 @@ class Broom:
 		policy = BoltzmannQPolicy()
 		self._model = Sequential()
 		self._model.add(Flatten(input_shape=nb_inputs))
-		self._model.add(Dense(units=288, activation='tanh'))
-		self._model.add(Dense(units=144, activation='relu'))
-		self._model.add(Dense(units=144, activation='relu'))
+		self._model.add(Dense(units=500, activation='tanh'))
+		self._model.add(Dense(units=500, activation='relu'))
+		self._model.add(Dense(units=250, activation='relu'))
 		self._model.add(Dense(units=nb_actions, activation='linear'))
 
 		self._dqn = DQNAgent(model=self._model, nb_actions=nb_actions, memory=memory,
-							 nb_steps_warmup=100, target_model_update=1e-2, policy=policy)
+							 nb_steps_warmup=1, target_model_update=1e-2, policy=policy)
 		self._dqn.compile(Adam(lr=1e-3), metrics=['mae'])
 
 	def Load(self, name):
@@ -55,18 +56,17 @@ class Broom:
 			name += ".h5"
 		self._model.save_weights(name)
 
-	def Train(self, training_steps=100000, games=1):
-		
-		for _ in range(games):
-			history = self._dqn.fit(
-				self._env, nb_steps=training_steps, visualize=True, verbose=2)
+	def Train(self, episodes=10):
 
-			# # Plot training points
-			# plt.plot(history.history['nb_episode_steps'], linewidth=1.0)
-			# plt.title('Boat Fitness')
-			# plt.ylabel('Number of steps per episode')
-			# plt.xlabel('Episode')
-			# plt.show()
+		history = self._dqn.fit(
+			self._env, nb_episodes=episodes, visualize=True, verbose=2)
+
+		# # Plot training points
+		# plt.plot(history.history['nb_episode_steps'], linewidth=1.0)
+		# plt.title('Boat Fitness')
+		# plt.ylabel('Number of steps per episode')
+		# plt.xlabel('Episode')
+		# plt.show()
 
 		ans = ""
 		while (ans != "Y" and ans != "N"):
