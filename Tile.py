@@ -4,14 +4,15 @@ import Globals
 import random
 
 class Tile:
-    def __init__(self, x, y, size, id, screen, count):
+    _screen = None
+    # TODO move graphic stuff out of here and into a function on its own
+    def __init__(self, x, y, size, id, count):
         padding = len(str(count))
         self._id = id
         self._strid = str(id).rjust(padding, '0')
         self._x = x
         self._y = y
         self._size = size
-        self._screen = screen
         
         self._mine = False
         
@@ -29,6 +30,9 @@ class Tile:
         
         # For training
         self._colorTraining = False
+        
+    def InitGraphics(self, screen):
+        _screen = screen
         
     # for training purposes
     def OverrideValue(self, val):
@@ -68,7 +72,7 @@ class Tile:
     
     def Draw(self):
         #border
-        pygame.draw.rect(self._screen, 
+        pygame.draw.rect(_screen, 
         (self._outline, self._outline, self._outline), 
         (self._x, self._y, self._size, self._size))
         
@@ -79,13 +83,13 @@ class Tile:
             ny = self._y + 1
             ns = self._size -2
             
-            pygame.draw.rect(self._screen, (c, c, c), (nx, ny, ns, ns))
+            pygame.draw.rect(_screen, (c, c, c), (nx, ny, ns, ns))
             
             if self._colorTraining:
                 r = random.randint(0,255)
                 g = random.randint(0,255)
                 b = random.randint(0,255)
-                pygame.draw.rect(self._screen, (r, g, b), (nx, ny, ns, ns))
+                pygame.draw.rect(_screen, (r, g, b), (nx, ny, ns, ns))
         else:
             #unrevealed tile
             
@@ -97,7 +101,7 @@ class Tile:
             nx = self._x + 1
             ny = self._y + 1
             ns = self._size - 2
-            pygame.draw.rect(self._screen, 
+            pygame.draw.rect(_screen, 
             (co, co, co), 
             (nx, ny, ns, ns))
             
@@ -105,7 +109,7 @@ class Tile:
             nx = self._x + 3
             ny = self._y + 3
             ns = self._size - 4
-            pygame.draw.rect(self._screen, 
+            pygame.draw.rect(_screen, 
             (ci, ci, ci), 
             (nx, ny, ns, ns))
             
@@ -113,18 +117,18 @@ class Tile:
                 r = random.randint(0,255)
                 g = random.randint(0,255)
                 b = random.randint(0,255)
-                pygame.draw.rect(self._screen, (r, g, b), (nx, ny, ns, ns))
+                pygame.draw.rect(_screen, (r, g, b), (nx, ny, ns, ns))
         
         if (self._revealed and self._mine):
             # has a mine
-            pygame.draw.ellipse(self._screen,
+            pygame.draw.ellipse(_screen,
             (0, 0, 0), 
             (nx+2, ny+2, 
             ns-4, ns-4))
         elif (self._revealed and self._nearbyMines > 0):
             # mines nearby
             textSurface = Globals._font.render(str(self._nearbyMines), False, self._textcolor)
-            self._screen.blit(textSurface, (self._x + 10, self._y + 5))
+            _screen.blit(textSurface, (self._x + 10, self._y + 5))
         
         # flag
         if (self._flagged and not self._revealed):
@@ -132,11 +136,11 @@ class Tile:
             cy = int(self._y + (self._size / 2))
             tip = int(self._size / 2 - 4)
             
-            pygame.draw.polygon(self._screen,
+            pygame.draw.polygon(_screen,
             (255, 0, 0),
             [[cx, ny+2], [cx, cy+2], [cx+tip, cy]])
             
-            pygame.draw.line(self._screen,
+            pygame.draw.line(_screen,
             (255, 0, 0),
             [cx, cy], [cx, self._y + self._size - 3])
         

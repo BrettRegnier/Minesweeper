@@ -1,7 +1,5 @@
-import random
 import gym
 import numpy as np
-import math
 from gym import spaces
 
 import pygame
@@ -10,21 +8,16 @@ from Grid import Grid
 from Menu import Menu
 from Screenshot import Screenshot
 
-import time
-
 
 class Minesweeper_v0(gym.Env):
     def __init__(self):
         super(Minesweeper_v0, self).__init__()
         self.Init()
-        self.InitGame()
+        self.InitGlobals()
+        self.InitGame(0)
 
         self._steps = 0
 
-        self._observationSpace = spaces.Box(
-            low=0, high=9, shape=(1, 144), dtype=np.int32)
-        self._actionSpace = spaces.Discrete(144)
-        
         self._wins = 0
         self._prevwins = 0
         self._loses = 0
@@ -33,7 +26,8 @@ class Minesweeper_v0(gym.Env):
         self._steps += 1
 
         # Make a decision
-        # quick math, this will allow for both the version that can see the game data and the one that cannot.
+        # quick math, this will allow for both the version that can see the
+        # game data and the one that cannot.
         size = 32
         xmargin = 20
         ymargin = 40
@@ -52,13 +46,13 @@ class Minesweeper_v0(gym.Env):
         reward = -1
         if revealed:
             reward = 1
-        
+
         done = False
-        if Globals._gameover == True and Globals._win == True:
+        if Globals._gameover and Globals._win:
             reward = 10
             done = True
             self._wins += 1
-        elif Globals._gameover == True:
+        elif Globals._gameover:
             reward = -10
             done = True
             self._loses += 1
@@ -68,7 +62,7 @@ class Minesweeper_v0(gym.Env):
         # bomb = -2
         # tile number = ##
         # get state after action
-        state = self._state
+        state = self._grid._state
 
         # print(action, "x:", x, "y:", y, "reward", reward, "done", done)
 
@@ -78,11 +72,11 @@ class Minesweeper_v0(gym.Env):
         if self._wins % 10 == 0 and self._wins > self._prevwins:
             self.ResetGame(True)
             self._prevwins = self._wins
-        else:            
+        else:
             self.ResetGame(False)
-        print ("loses:", self._loses, "wins:", self._wins) 
+        print("loses:", self._loses, "wins:", self._wins)
 
-        return self._state
+        return self._grid._state
 
     def render(self, mode="human", close=False):
         if (mode == "human"):
@@ -95,10 +89,6 @@ class Minesweeper_v0(gym.Env):
 
         # Game clock
         self._clock = None
-
-        # The width and height of the game window
-        self._windowWidth = 424
-        self._windowHeight = 444
 
         # Mouse click types
         self._mtype = 0
@@ -118,8 +108,8 @@ class Minesweeper_v0(gym.Env):
         # The Ai used to predict what is in each square
         self._CNN = None
 
-        ### Training for the CNN Variables ###
-        # Used for determining if the the program should cycle fonts and screenshot
+        # Training for the CNN Variables #
+        # Used for determining if the program should cycle fonts and screenshot
         self._screenshotFonts = False
         # Index of the current font in a list of fonts
         self._fontidx = 0
@@ -127,20 +117,21 @@ class Minesweeper_v0(gym.Env):
         self._screenshotRandomColours = False
         # I don't know right now
         self._colourcount = 0
-        self._quit = None
 
-    def InitGame(self):
-        print("Initializing Minesweeper")
-        # pygame.init()
-        # Logo
-        #logo = pygame.image.load("logo.png")
-        # pygame.display.set_icon(logo)
-        pygame.display.set_caption("Minesweeper")
+    def InitGlobals(self):
+        Globals._screenshot = Screenshot(self._screen)
+        pygame.font.init()
+        Globals._fontname = "times new roman"
+        Globals._font = pygame.font.SysFont(Globals._fontname, 12)
+        Globals._gameover = False
+        Globals._win = False
+        Globals._newgame = False
+        Globals._colorsEnabled = True
+        Globals._MakeTrainingData = False
+        Globals._OverrideMineCount = 0
+        Globals._TestCount = 0
 
-        self._screen = pygame.display.set_mode(
-            [self._windowWidth, self._windowHeight])
-        self._screen.fill([240, 240, 240])
-
+    def InitGame(self, difficulty):
         self._clock = pygame.time.Clock()
 
         # The cnn to play the game should not be part of the gym environment
@@ -148,39 +139,64 @@ class Minesweeper_v0(gym.Env):
         # print("Initializing CNN")
         # self._CNN = NumberClassifier()
 
-        print("Initializing Globals")
-        pygame.font.init()
-        self.SetDefaultFont()
-        Globals._screenshot = Screenshot(self._screen)
+        size = 0
+        mines = 0
+        rows = 0
+        columns = 0
+        if difficulty == 0:
+            mines = 10  # easy
+            rows = 8
+            columns = 10
+            self._windowWidth = 320
+            self._windowHeight = 256
+        elif difficulty == 1:
+            mines = 40  # medium
+            rows = 18
+            columns = 14
+            self._windowWidth = 576
+            self._windowHeight = 448
+        elif difficulty == 2:
+            mines = 99  # hard
+            rows = 24
+            columns = 20
+            self._windowWidth = 768
+            self._windowHeight = 640
 
-        m = 20  # Margin
-        # Box inside of window
-        w = int(self._windowWidth - m*2)
-        h = int(self._windowHeight - m*2)
-        self._grid = Grid(m, m*2, w, h, 1, self._screen)
-        self._menu = Menu(self._windowWidth, self._windowHeight, self._screen)
-        self._state = self._grid._state
+        total = rows * columns
+        self._observationSpace = spaces.Box(
+            low=0, high=9, shape=(1, total), dtype=np.int32)
+        self._actionSpace = spaces.Discrete(total)
+
+        self._grid = Grid(0, 40, self._windowWidth,
+                          self._windowHeight, rows, columns, mines)
+
+    def InitGraphics(self):
+        # Logo
+        # logo = pygame.image.load("logo.png")
+        # pygame.display.set_icon(logo)
+        pygame.display.set_caption("Minesweeper")
+
+        self._screen = pygame.display.set_mode(
+            [self._windowWidth, self._windowHeight])
+        self._screen.fill([240, 240, 240])
         
-        Globals._gameover = False
-        Globals._win = False
+        self._grid.InitGraphics(self._screen)
+        self._menu = Menu(self._windowWidth, self._windowHeight, self._screen)
 
-        print("Ready to play")
-    
+        pygame.font.init()
+
     def ResetGame(self, hard):
         self._grid.Reset(hard)
-        self._state = self._grid._state       
-        
+
         Globals._gameover = False
         Globals._win = False
 
-    def SetDefaultFont(self):
-        Globals._fontname = "times new roman"
-        Globals._font = pygame.font.SysFont(Globals._fontname, 24)
-
     # Begin game logic #
-
     # Display the game
     def Render(self):
+        if (self._screen == None):
+            self.InitGraphics()
+        
         self._screen.fill((240, 240, 240))
 
         self.Draw()
@@ -189,12 +205,10 @@ class Minesweeper_v0(gym.Env):
 
         pygame.display.update()
 
-    def Update(self):        
+    def Update(self):
         tick = self._clock.tick(self._fps)
         self._menu.Update(tick)
         self._grid.Update(tick)
-
-        self._state = self._grid._state
 
     def Draw(self):
         self._menu.Draw()
@@ -252,11 +266,19 @@ class Minesweeper_v0(gym.Env):
                         print("Training Mode enabled")
                     else:
                         print("Training Mode disabled")
-                
+
+    def Play(self):
+        self.InitGraphics()
+        self._running = True
+        while self._running:
+            self.Update()
+            self.Render()
 
     def Gameover(self):
         # display gameover
         if Globals._win == False:
-            textSurface = Globals._font.render(str("Game Over."), False, (0, 0, 0))
+            textSurface = Globals._font.render(
+                str("Game Over."), False, (0, 0, 0))
         elif Globals._win == True:
-            textSurface = Globals._font.render(str("Victory!"), False, (0, 0, 0))
+            textSurface = Globals._font.render(
+                str("Victory!"), False, (0, 0, 0))

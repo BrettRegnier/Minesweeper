@@ -4,44 +4,35 @@ import Tile
 import Globals
 
 class Grid:
-    def __init__(self, x, y, width, height, difficulty, screen):
-        if (difficulty == 1):
-            # easy
-            self._mines = 10
-        elif (difficulty == 2):
-            # med
-            self._mines = 25
-        elif (difficulty == 3):
-            # hard
-            self._mines = 40
-
+    def __init__(self, x, y, width, height, rows, columns, mines):
         self._x = x
         self._y = y
         self._width = width
         self._height = height
-        self._unrevealedCount = 0
+        self._mines = mines
         
+        self._unrevealedCount = 0
+
+        self.Build(rows, columns)
+        
+    def InitGraphics(self, screen):
         self._screen = screen
+        Tile._screen = screen
 
-        self.Build()
-
-    def Build(self):
+    def Build(self, rows, columns):
         # first tile
         x = 0
         y = 0
         size = 32
         self._tiles = []
         self._state = []
-
-        rows = int(self._height / size)
-        columns = int(self._width / size)
         total = rows*columns
         count = 0
 
         # create tiles 1-d
         for r in range(rows):
             for c in range(columns):
-                self._tiles.append(Tile.Tile(self._x + x, self._y + y, size, count, self._screen, total))
+                self._tiles.append(Tile.Tile(self._x + x, self._y + y, size, count, total))
                 x = x + size
 
                 # For training

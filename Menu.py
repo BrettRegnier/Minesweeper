@@ -22,7 +22,7 @@ class Menu:
         btnHelp = Button.Button("Help", btnNewGame.Right(), 0, screen, ngfunc)
         
         self._items.append(btnNewGame)
-        self._items.append(btnHelp)
+        self._items.append(btnHelp)    
         
     def Update(self, tick):
         pass

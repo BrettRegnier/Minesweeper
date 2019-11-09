@@ -23,7 +23,6 @@ class Button:
             
         textSurface = Globals._font.render(self._string, False, (0, 0, 0))
         self._screen.blit(textSurface, (self._x + 3, self._y))
-        
     
     def Update(self, tick):
         pass

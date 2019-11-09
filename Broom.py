@@ -59,7 +59,7 @@ class Broom:
 	def Train(self, episodes=10):
 
 		history = self._dqn.fit(
-			self._env, nb_episodes=episodes, visualize=True, verbose=2)
+			self._env, nb_steps=100000, visualize=False, verbose=2)
 
 		# # Plot training points
 		# plt.plot(history.history['nb_episode_steps'], linewidth=1.0)
