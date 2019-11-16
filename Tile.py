@@ -158,13 +158,11 @@ class Tile:
                 self.Reveal()
                 clickrevealed = True
                 
-                self._state = self._nearbyMines
-                
                 if (self._mine):
                     Globals._gameover = True
                     Globals._win = False
                     self._state = -2
-                    print("BOOM! Gameover")
+                    # print("BOOM! Gameover")
                 
                 
                 # Test
@@ -185,6 +183,7 @@ class Tile:
     
     def Reveal(self):
         self._revealed = True
+        self._state = self._nearbyMines
         
         #only cascade if the tile is blank
         if (self._nearbyMines == 0 and not self._mine):

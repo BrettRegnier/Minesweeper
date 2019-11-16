@@ -12,26 +12,27 @@ class Grid:
         self._mines = mines
         
         self._unrevealedCount = 0
-
-        self.Build(rows, columns)
+        self._rows = rows
+        self._columns = columns
+        self.Build()
         
     def InitGraphics(self, screen):
         self._screen = screen
         Tile._screen = screen
 
-    def Build(self, rows, columns):
+    def Build(self):
         # first tile
         x = 0
         y = 0
         size = 32
         self._tiles = []
         self._state = []
-        total = rows*columns
+        total = self._rows*self._columns
         count = 0
 
         # create tiles 1-d
-        for r in range(rows):
-            for c in range(columns):
+        for r in range(self._rows):
+            for c in range(self._columns):
                 self._tiles.append(Tile.Tile(self._x + x, self._y + y, size, count, total))
                 x = x + size
 
@@ -60,7 +61,7 @@ class Grid:
                 toMakeMine = toMakeMine - 1
 
         # make tiles known to eachother
-        tpr = columns  # Tiles per row
+        tpr = self._columns  # Tiles per row
         count = len(self._tiles)
         for i in range(count):
             r = int(i / tpr)  # current row

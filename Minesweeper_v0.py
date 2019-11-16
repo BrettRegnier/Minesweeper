@@ -12,15 +12,20 @@ from Screenshot import Screenshot
 class Minesweeper_v0(gym.Env):
     def __init__(self):
         super(Minesweeper_v0, self).__init__()
+        # testing
+        self._drawees = []
+        self._updatees = []
+        #end test
         self.Init()
         self.InitGlobals()
-        self.InitGame(0)
+        self.InitGame(4)
 
         self._steps = 0
 
         self._wins = 0
         self._prevwins = 0
         self._loses = 0
+        
 
     def step(self, action):
         self._steps += 1
@@ -29,11 +34,14 @@ class Minesweeper_v0(gym.Env):
         # quick math, this will allow for both the version that can see the
         # game data and the one that cannot.
         size = 32
-        xmargin = 20
-        ymargin = 40
 
-        x = xmargin + size/2 + (action % 12) * size
-        y = ymargin + size/2 + int(action / 12) * size
+        # if action == 2:
+        #     print(action % self._columns)
+        #     exit()
+
+        x = size/2 + (action % self._columns) * size
+        y = 20 + size/2 + int(action % self._rows) * size
+        # import time 
         # time.sleep(2)
 
         # pygame.mouse.set_pos(x, y)
@@ -43,17 +51,17 @@ class Minesweeper_v0(gym.Env):
         self.Update()
 
         # reward
-        reward = -1
+        reward = -0.3
         if revealed:
-            reward = 1
+            reward = 0.9
 
         done = False
         if Globals._gameover and Globals._win:
-            reward = 10
+            reward = 1
             done = True
             self._wins += 1
         elif Globals._gameover:
-            reward = -10
+            reward = -1
             done = True
             self._loses += 1
 
@@ -69,12 +77,12 @@ class Minesweeper_v0(gym.Env):
         return state, reward, done, {}
 
     def reset(self):
-        if self._wins % 10 == 0 and self._wins > self._prevwins:
+        if self._wins % 1 == 0 and self._wins > self._prevwins:
             self.ResetGame(True)
             self._prevwins = self._wins
         else:
-            self.ResetGame(False)
-        print("loses:", self._loses, "wins:", self._wins)
+            self.ResetGame(True)
+        print(" losses:", self._loses, "wins:", self._wins)
 
         return self._grid._state
 
@@ -141,34 +149,55 @@ class Minesweeper_v0(gym.Env):
 
         size = 0
         mines = 0
-        rows = 0
-        columns = 0
+        self._rows = 0
+        self._columns = 0
         if difficulty == 0:
             mines = 10  # easy
-            rows = 8
-            columns = 10
+            self._rows = 8
+            self._columns = 10
             self._windowWidth = 320
-            self._windowHeight = 256
+            self._windowHeight = 276
         elif difficulty == 1:
             mines = 40  # medium
-            rows = 18
-            columns = 14
+            self._rows = 14
+            self._columns = 18
             self._windowWidth = 576
-            self._windowHeight = 448
+            self._windowHeight = 468
         elif difficulty == 2:
             mines = 99  # hard
-            rows = 24
-            columns = 20
+            self._rows = 20
+            self._columns = 24
             self._windowWidth = 768
-            self._windowHeight = 640
+            self._windowHeight = 660
+        elif difficulty == 3:
+            mines = 6  # very easy
+            self._rows = 5
+            self._columns = 7
+            self._windowWidth = 224
+            self._windowHeight = 180
+        elif difficulty == 4:
+            mines = 3  # extra very easy
+            self._rows = 3
+            self._columns = 4
+            self._windowWidth = 128
+            self._windowHeight = 116
+        elif difficulty == 5:
+            mines = 1  # ultra instinct easy
+            self._rows = 2
+            self._columns = 3
+            self._windowWidth = 96
+            self._windowHeight = 84
 
-        total = rows * columns
+        total = self._rows * self._columns
         self._observationSpace = spaces.Box(
             low=0, high=9, shape=(1, total), dtype=np.int32)
         self._actionSpace = spaces.Discrete(total)
 
-        self._grid = Grid(0, 40, self._windowWidth,
-                          self._windowHeight, rows, columns, mines)
+        self._grid = Grid(0, 20, self._windowWidth,
+                          self._windowHeight, self._rows, self._columns, mines)
+                          
+        self._updatees.append(self._grid)
+        self._drawees.append(self._grid)
 
     def InitGraphics(self):
         # Logo
@@ -179,9 +208,12 @@ class Minesweeper_v0(gym.Env):
         self._screen = pygame.display.set_mode(
             [self._windowWidth, self._windowHeight])
         self._screen.fill([240, 240, 240])
-        
+
         self._grid.InitGraphics(self._screen)
         self._menu = Menu(self._windowWidth, self._windowHeight, self._screen)
+        
+        self._updatees.append(self._menu)
+        self._drawees.append(self._menu)
 
         pygame.font.init()
 
@@ -196,7 +228,7 @@ class Minesweeper_v0(gym.Env):
     def Render(self):
         if (self._screen == None):
             self.InitGraphics()
-        
+
         self._screen.fill((240, 240, 240))
 
         self.Draw()
@@ -207,12 +239,13 @@ class Minesweeper_v0(gym.Env):
 
     def Update(self):
         tick = self._clock.tick(self._fps)
-        self._menu.Update(tick)
-        self._grid.Update(tick)
+        
+        for up in self._updatees:
+            up.Update(tick)
 
     def Draw(self):
-        self._menu.Draw()
-        self._grid.Draw()
+        for drawee in self._drawees:
+            drawee.Draw()
 
         if (Globals._gameover):
             self.Gameover()
@@ -266,6 +299,7 @@ class Minesweeper_v0(gym.Env):
                         print("Training Mode enabled")
                     else:
                         print("Training Mode disabled")
+                    print(self._grid._state)
 
     def Play(self):
         self.InitGraphics()
