@@ -104,3 +104,7 @@ venv.bak/
 .mypy_cache/
 
 dataset/gameset
+
+.vscode/*
+
+__pycache__/*

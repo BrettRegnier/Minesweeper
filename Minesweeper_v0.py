@@ -8,6 +8,8 @@ from Grid import Grid
 from Menu import Menu
 from Screenshot import Screenshot
 
+import time
+
 
 class Minesweeper_v0(gym.Env):
     def __init__(self):
@@ -24,7 +26,7 @@ class Minesweeper_v0(gym.Env):
 
         self._wins = 0
         self._prevwins = 0
-        self._loses = 0
+        self._losses = 0
         
 
     def step(self, action):
@@ -40,15 +42,22 @@ class Minesweeper_v0(gym.Env):
         #     exit()
 
         x = size/2 + (action % self._columns) * size
-        y = 20 + size/2 + int(action % self._rows) * size
+        y = 20 + size/2 + int(action / self._columns) * size
         # import time 
         # time.sleep(2)
 
         # pygame.mouse.set_pos(x, y)
-        revealed = self._grid.Click(x, y, 0)
+        revealed = self._grid.Click(x, y, 0)        
 
         # update the game after the decision.
         self.Update()
+        
+        playamount = 100
+        show = 10
+        # if (self._losses + self._wins) % playamount < show:
+        #     self.Render()
+        # elif (self._losses + self._wins) % playamount == show:
+        #     self.DeInitGraphics()
 
         # reward
         reward = -0.3
@@ -57,13 +66,13 @@ class Minesweeper_v0(gym.Env):
 
         done = False
         if Globals._gameover and Globals._win:
-            reward = 1
+            reward = 2
             done = True
             self._wins += 1
         elif Globals._gameover:
             reward = -1
             done = True
-            self._loses += 1
+            self._losses += 1
 
         # unrevealed = -1
         # revealed & empty = 0
@@ -71,24 +80,27 @@ class Minesweeper_v0(gym.Env):
         # tile number = ##
         # get state after action
         state = self._grid._state
-
+        
+        # print()
+        # print(state)
         # print(action, "x:", x, "y:", y, "reward", reward, "done", done)
 
         return state, reward, done, {}
 
     def reset(self):
         if self._wins % 1 == 0 and self._wins > self._prevwins:
-            self.ResetGame(True)
+            self.ResetGame(False)
             self._prevwins = self._wins
         else:
-            self.ResetGame(True)
-        print(" losses:", self._loses, "wins:", self._wins)
+            self.ResetGame(False)
 
+        print(" losses:", self._losses, "wins:", self._wins)
         return self._grid._state
 
     def render(self, mode="human", close=False):
         if (mode == "human"):
             self.Render()
+            
 
     # Game logic below
     def Init(self):
@@ -197,12 +209,13 @@ class Minesweeper_v0(gym.Env):
                           self._windowHeight, self._rows, self._columns, mines)
                           
         self._updatees.append(self._grid)
-        self._drawees.append(self._grid)
 
     def InitGraphics(self):
         # Logo
         # logo = pygame.image.load("logo.png")
         # pygame.display.set_icon(logo)
+        print("init graphics")
+        pygame.display.init()
         pygame.display.set_caption("Minesweeper")
 
         self._screen = pygame.display.set_mode(
@@ -210,12 +223,21 @@ class Minesweeper_v0(gym.Env):
         self._screen.fill([240, 240, 240])
 
         self._grid.InitGraphics(self._screen)
+        self._drawees.append(self._grid)
+        
         self._menu = Menu(self._windowWidth, self._windowHeight, self._screen)
         
         self._updatees.append(self._menu)
         self._drawees.append(self._menu)
 
         pygame.font.init()
+    
+    def DeInitGraphics(self):
+        pygame.display.quit()
+        self._screen = None
+        self._grid.InitGraphics(None)
+        self._menu = None
+        self._drawees = []
 
     def ResetGame(self, hard):
         self._grid.Reset(hard)

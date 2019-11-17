@@ -155,7 +155,8 @@ class Grid:
         for tile in self._tiles:
             tile.Update(tick)
             
-            self._state[i] = tile._state
+            if self._state[i] != tile._state:
+                self._state[i] = tile._state
             i += 1
             if tile._revealed == False:           
                 self._unrevealedCount += 1

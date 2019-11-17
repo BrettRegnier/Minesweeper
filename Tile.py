@@ -146,8 +146,9 @@ class Tile:
         
     def Update(self, tick):
         #animation stuff here.
-        if (Globals._gameover == True and not self._revealed):
-            self.RevealSelf()
+        # if (Globals._gameover == True and not self._revealed):
+        #     self.RevealSelf()
+        pass
         
     def Click(self, mx, my, mtype):
         clickrevealed = False
@@ -178,16 +179,25 @@ class Tile:
     def Flag(self):
         self._flagged = not self._flagged
     
-    def RevealSelf(self):
-        self._revealed = True
-    
     def Reveal(self):
-        self._revealed = True
-        self._state = self._nearbyMines
+        self.RevealSelf()
         
         #only cascade if the tile is blank
         if (self._nearbyMines == 0 and not self._mine):
             self.Cascade()
+    
+    def RevealSelf(self):
+        self._revealed = True
+        self.SetState()
+            
+    def SetState(self):
+        if self._revealed:
+            if self._mine:
+                self._state = -2
+            else:
+                self._state = self._nearbyMines                
+        else:
+            self._state = -1
         
     def Revealed(self):
         return self._revealed

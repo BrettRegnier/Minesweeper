@@ -10,6 +10,6 @@
     "editor.acceptSuggestionOnEnter": "off",
 	"python.linting.pylamaEnabled": false,
     "git.ignoreLimitWarning": true,
-    "python.pythonPath": "D:\\dev\\lang\\python3_7_3\\python.exe"
+    "python.pythonPath": "D:\\dev\\lng\\python3_7_2\\python.exe"
 }
 
