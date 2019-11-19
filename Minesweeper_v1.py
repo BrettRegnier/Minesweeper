@@ -118,7 +118,7 @@ class Minesweeper_v1(gym.Env):
 		pass
 
 	def Click(self):
-		pass
+		x, y = self._cursor.Click()
 	# TODO cursor
 	
 	def Events(self):

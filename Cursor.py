@@ -9,21 +9,33 @@ class Cursor():
 		self._x, self._y = mouse.get_pos()
 	
 	def Draw(self, screen, graphics):
+		cx = self._x - self._w / 2
+		cy = self._y - self._h / 2
+		
 		graphics.rect(screen, 
 			(0, 0, 0),
-			(self._x - self._w/2, self._y - self._h/2, self._w, self._h),
+			(cx, cy, self._w, self._h),
 			2)
-	
-		# graphics.line(screen, 
-		# 	(0, 0, 0),
-		# 	(self._x, int((self._y+1)/2)),
-		# 	(self._w, int(self._y+1)))
+		
+		# Horizontal line
+		graphics.line(screen, 
+			(0, 0, 0),
+			(cx, self._y - 1),
+			(self._x + self._w / 2, self._y - 1),
+			2)
+		
+		# Vertical line
+		graphics.line(screen, 
+			(0, 0, 0),
+			(self._x - 1, cy),
+			(self._x - 1, self._y + self._h / 2),
+			2)
 		
 	def MouseHover(self):
-		pass
+		return self.GetPosition()
 	
 	def Click(self):
-		pass
+		return self.GetPosition()
 	
 	def SetPosition(self, x, y):
 		self._x = x
