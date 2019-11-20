@@ -1,3 +1,5 @@
+from pygame import font
+
 class Tile():
 	def __init__(self, x, y, size, tid):
 		self._x = x
@@ -6,6 +8,7 @@ class Tile():
 		self._id = tid
 		
 		self._mine = False
+		self._nearbyMines = 0
 		self._adjTiles = []
 		
 		self._revealed = False
@@ -17,27 +20,59 @@ class Tile():
 		self._revealedcolor = 180
 		self._outline = 100
 		self._textcolor = (0, 0, 0)
+		
+		font.init()
+		self._font = font.SysFont("Times New Roman", 12)
 	
 	def Update(self, tick):
 		pass
 	
 	def Draw(self, screen, graphics):
+		#border
+		graphics.rect(screen, 
+			(self._outline, self._outline, self._outline), 
+			(self._x, self._y, self._size, self._size))
+			
+		# revealed tile
+		if (self._revealed):
+			c = self._revealedcolor
+			nx = self._x + 1
+			ny = self._y + 1
+			ns = self._size -2
+			
+			graphics.rect(screen, 
+				(c, c, c), 
+				(nx, ny, ns, ns))
+					
+			if (self._mine):
+				# has a mine
+				graphics.ellipse(screen,
+					(0, 0, 0), 
+					(nx+2, ny+2, 
+					ns-4, ns-4))
+					
+			elif (self._nearbyMines > 0):
+				# mines nearby
+				textSurface = self._font.render(str(self._nearbyMines),
+					False, 
+					self._textcolor)
+					
+				screen.blit(textSurface, (self._x + 10, self._y + 5))
+	
+	def MouseHover(self):
 		pass
 	
-	def MouseHover(self, mx, my):
-		pass
-	
-	def Click(self, mx, my):
+	def Click(self):
 		pass
 	
 	def Reset(self):
 		pass
 	
 	def IsMine(self):
-		return self._isMine
+		return self._mine
 		
 	def BeMine(self):
-		self._state = 11
+		# state = 11
 		self._mine = True
 		
 	def GetState(self):
@@ -46,7 +81,7 @@ class Tile():
 	def AdjacentTiles(self, adj):
 		self._adjTiles = adj
 		
-		for tile in self._adjacentTiles:
+		for tile in self._adjTiles:
 			if (tile is not None and tile.IsMine()):
 				self._nearbyMines = self._nearbyMines + 1
 				

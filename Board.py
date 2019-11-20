@@ -7,8 +7,8 @@ class Board():
 	def __init__(self, x, y, w, h, rows, columns, mines):
 		self._x = x
 		self._y = y
-		self._width = width
-		self._height = height
+		self._width = w
+		self._height = h
 		self._mines = mines
 		
 		self._rows = rows
@@ -18,11 +18,13 @@ class Board():
 		self._state = []
 		
 		self._unrevealed = 0 # tiles that are not mines that are unrevealed should be updtated in click
+		self._tileSize = 32
+		
+		self.CreateBoard()
 
 	def CreateBoard(self):
 		x = 0
 		y = 0
-		size = 32
 		total = self._rows * self._columns
 		self._unrevealed = total - self._mines
 		
@@ -31,15 +33,15 @@ class Board():
 		# create tiles 1-d
 		for r in range(self._rows):
 			for c in range(self._columns):
-				tile = Tile(self._x + x, self._y + y, size)
+				tile = Tile(self._x + x, self._y + y, self._tileSize, count)
 				self._tiles.append(tile)
-				x = x + size
+				x = x + self._tileSize
 				
 				self._state.append(tile.GetState()) # set the state to be all unrevealed - 10
 				count = count + 1
 
 			x = 0
-			y = y + size
+			y = y + self._tileSize
 			
 		# Make mines
 		toMakeMine = self._mines
@@ -141,13 +143,26 @@ class Board():
 			tile.Update(tick)
 
 	def Draw(self, screen, graphics):
-		pass
+		for tile in self._tiles:
+			tile.Draw(screen, graphics)
 
 	def MouseHover(self, mx, my):
-		pass
+		# cut down on computational time.
+		# rows * num columns + index.
+		column = (mx - self._x) % self._tileSize
+		row = (my - self._y) % self._tileSize
+		idx = row * self._columns + column
+		
+		self._tiles[idx].MouseHover()
 
 	def Click(self, mx, my):
-		pass
+		# cut down on computational time.
+		# rows * num columns + index.
+		column = (mx - self._x) % self._tileSize
+		row = (my - self._y) % self._tileSize
+		idx = row * self._columns + column
+		
+		self._tiles[idx].Click()
 
 	def Reset(self, hard):
 		pass
