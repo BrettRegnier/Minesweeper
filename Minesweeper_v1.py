@@ -97,16 +97,16 @@ class Minesweeper_v1(gym.Env):
 		
 		self._graphics = pygame.draw
 
-		self._drawees.append(self._cursor)
 		self._drawees.append(self._menu)
 		self._drawees.append(self._board)
+		self._drawees.append(self._cursor)
 
 	def Update(self):
 		tick = self._clock.tick(self._fps)
 		
-		self._cursor.Update(tick, pygame.mouse)
 		self._menu.Update(tick)
 		self._board.Update(tick)
+		self._cursor.Update(tick, pygame.mouse)
 
 	def Draw(self):
 		for d in self._drawees:
@@ -116,16 +116,20 @@ class Minesweeper_v1(gym.Env):
 		# for d in self._drawees:
 		# 	d.MouseHover()
 		pass
-
-	def Click(self):
-		x, y = self._cursor.Click()
-	# TODO cursor
 	
+	# TODO event handles
 	def Events(self):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				self._running = False
-	# TODO event handles
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				press = pygame.mouse.get_pressed()
+				if (press[0]):
+					pass
+				
+	def Click(self, mtype):
+		x, y = self._cursor.Click()
+	# TODO cursor			
 
 	def Restart(self, hard):
 		pass
