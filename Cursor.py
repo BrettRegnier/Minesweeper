@@ -12,10 +12,10 @@ class Cursor():
 		cx = self._x - self._w / 2
 		cy = self._y - self._h / 2
 		
-		graphics.rect(screen, 
-			(0, 0, 0),
-			(cx, cy, self._w, self._h),
-			2)
+		# graphics.rect(screen, 
+		# 	(0, 0, 0),
+		# 	(cx, cy, self._w, self._h),
+		# 	2)
 		
 		# Horizontal line
 		graphics.line(screen, 

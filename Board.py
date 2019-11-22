@@ -155,14 +155,14 @@ class Board():
 		
 		self._tiles[idx].MouseHover()
 
-	def Click(self, mx, my):
+	def Click(self, mx, my, mtype):
 		# cut down on computational time.
 		# rows * num columns + index.
-		column = (mx - self._x) % self._tileSize
-		row = (my - self._y) % self._tileSize
+		column = int((mx - self._x) / self._tileSize)
+		row = int((my - self._y) / self._tileSize)
 		idx = row * self._columns + column
 		
-		self._tiles[idx].Click()
+		self._tiles[idx].Click(mtype)
 
 	def Reset(self, hard):
 		pass

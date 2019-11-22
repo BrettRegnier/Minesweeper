@@ -125,11 +125,13 @@ class Minesweeper_v1(gym.Env):
 			elif event.type == pygame.MOUSEBUTTONDOWN:
 				press = pygame.mouse.get_pressed()
 				if (press[0]):
-					pass
+					self.Click(0)
+				elif (press[1]):
+					self.Click(1)
 				
 	def Click(self, mtype):
 		x, y = self._cursor.Click()
-	# TODO cursor			
+		self._board.Click(x, y, mtype)
 
 	def Restart(self, hard):
 		pass
