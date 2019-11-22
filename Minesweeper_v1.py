@@ -8,10 +8,13 @@ from Menu import Menu
 from Cursor import Cursor
 
 class Minesweeper_v1(gym.Env):
-	def __init__(self):
+	def __init__(self, human):
 		super(Minesweeper_v1, self).__init__()
+		self._human = human # true or false
 		self.Init()
-		self.InitGame(1)
+		self.InitGame(0)
+
+		self._actions = 0
 
 	def Init(self):
 		self._wWidth = 0
@@ -66,10 +69,16 @@ class Minesweeper_v1(gym.Env):
 			rows = 2
 			columns = 3
 
+		self._columns = columns
+		self._rows = rows
+
 		self._wWidth = columns * 32
 		self._wHeight = rows * 32 + mHeight
 		
-		self._cursor = Cursor(10, 10, 11, 11)
+		mouse = None
+		if (self._human):
+			mouse = pygame.mouse
+		self._cursor = Cursor(16, 36, 11, 11, mouse)
 		
 		self._menu = Menu(0, mHeight, self._wWidth, self._wHeight)
 
@@ -106,7 +115,7 @@ class Minesweeper_v1(gym.Env):
 		
 		self._menu.Update(tick)
 		self._board.Update(tick)
-		self._cursor.Update(tick, pygame.mouse)
+		self._cursor.Update(tick)
 
 	def Draw(self):
 		for d in self._drawees:
@@ -126,8 +135,12 @@ class Minesweeper_v1(gym.Env):
 				press = pygame.mouse.get_pressed()
 				if (press[0]):
 					self.Click(0)
-				elif (press[1]):
+				elif (press[2]):
 					self.Click(1)
+			
+			if event.type == pygame.KEYUP:
+				if event.key == pygame.K_h:
+					self._cursor.SetPosition(10, 20)
 				
 	def Click(self, mtype):
 		x, y = self._cursor.Click()
