@@ -112,7 +112,7 @@ class Tile():
 					[cx, cy], [cx, self._y + self._size - 3])
 	
 	def MouseHover(self):
-		pass
+		self._hover = true
 	
 	def Click(self, mtype):
 		if (self._revealed == False):
@@ -120,8 +120,7 @@ class Tile():
 				self.Reveal()
 			elif (mtype == 1):
 				self.Flag()
-	
-		#TODO figure out how to return the state when it cascades.
+		return self._mine
 	
 	def Reset(self):
 		pass
