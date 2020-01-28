@@ -6,6 +6,7 @@ import pygame
 from Board import Board
 from Menu import Menu
 from Cursor import Cursor
+import State
 
 class Minesweeper_v1(gym.Env):
 	def __init__(self, human):
@@ -116,15 +117,18 @@ class Minesweeper_v1(gym.Env):
 		self._menu.Update(tick)
 		self._board.Update(tick)
 		self._cursor.Update(tick)
+		
+		if State._gameover:
+			self.Restart(True)
 
 	def Draw(self):
 		for d in self._drawees:
 			d.Draw(self._screen, self._graphics)
 
 	def MouseHover(self):
-		# for d in self._drawees:
-		# 	d.MouseHover()
-		pass
+		x, y = self._cursor.Click()
+		self._menu.MouseHover(x, y)
+		self._board.MouseHover(x, y)
 	
 	# TODO event handles
 	def Events(self):
@@ -147,7 +151,7 @@ class Minesweeper_v1(gym.Env):
 		self._board.Click(x, y, mtype)
 
 	def Restart(self, hard):
-		pass
+		self._board.Reset(hard)
 
 	def Play(self):
 		self.InitGraphics()

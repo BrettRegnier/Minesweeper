@@ -21,11 +21,13 @@ class Tile():
 		self._outline = 100
 		self._textcolor = (0, 0, 0)
 		
+		self._hover = False
+		
 		font.init()
 		self._font = font.SysFont("Times New Roman", 12)
 	
 	def Update(self, tick):
-		pass
+		self._hover = False
 	
 	def Draw(self, screen, graphics):
 		#border
@@ -86,10 +88,16 @@ class Tile():
 			ny = self._y + 1
 			ns = self._size - 2
 			
+			# if hovering do a different outline maybe make it prettier
+			if self._hover:
+				nx += 1
+				ny += 1
+				ns -= 1
+				
 			graphics.rect(screen, 
 				(co, co, co), 
 				(nx, ny, ns, ns))
-			
+				
 			# inner design
 			nx = self._x + 3
 			ny = self._y + 3
@@ -110,9 +118,10 @@ class Tile():
 				graphics.line(screen,
 					(255, 0, 0),
 					[cx, cy], [cx, self._y + self._size - 3])
+					
 	
 	def MouseHover(self):
-		self._hover = true
+		self._hover = True
 	
 	def Click(self, mtype):
 		if (self._revealed == False):

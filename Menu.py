@@ -11,7 +11,7 @@ class Menu():
 	def Draw(self, screen, graphics):
 		pass
 	
-	def MouseHover(self):
+	def MouseHover(self, x, y):
 		pass
 	
 	def Click(self):

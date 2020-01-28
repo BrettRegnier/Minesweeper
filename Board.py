@@ -1,6 +1,7 @@
 import random
 
 from Tile import Tile
+import State
 
 #TODO make game state class that is global.
 
@@ -21,8 +22,7 @@ class Board():
 		self._unrevealed = 0 # tiles that are not mines that are unrevealed should be updated in click
 		self._tileSize = 32
 
-		self._gameover = False
-		#GameState._gameover = False
+		State._gameover = False
 		
 		self.CreateBoard()
 
@@ -145,7 +145,7 @@ class Board():
 	def Update(self, tick):
 		for tile in self._tiles:
 			tile.Update(tick)
-		if self._gameover:
+		if State._gameover:
 			for tile in self._tiles:
 				tile.RevealSelf()
 
@@ -154,20 +154,23 @@ class Board():
 			tile.Draw(screen, graphics)
 
 	def MouseHover(self, mx, my):
-		idx = self.GetTileHover(mx, my)
-		self._tiles[idx].MouseHover()
+		if (mx >= self._x and mx <= self._x + self._width and my >= self._y and my <= self._y + self._height):
+			idx = self.GetTileHover(mx, my)
+			self._tiles[idx].MouseHover()
 
 	def Click(self, mx, my, mtype):
-		if self._gameover == False:
-			idx = self.GetTileHover(mx, my)
-			self._gameover = self._tiles[idx].Click(mtype)
+		if State._gameover == False:
+			if (mx >= self._x and mx <= self._x + self._width and my >= self._y and my <= self._y + self._height):
+				idx = self.GetTileHover(mx, my)
+				state = self._tiles[idx].Click(mtype)
+				State._gameover = state # if it hits a mine then it will be true
 	
 	def GetTileHover(self, mx, my):
-		#cut down on computational time
+		# cut down on computational time
 		# rows * columns + index
 		column = int((mx - self._x) / self._tileSize)
 		row = int((my - self._y) / self._tileSize)
 		return row * self._columns + column
 
 	def Reset(self, hard):
-		pass
+		State._gameover = False
