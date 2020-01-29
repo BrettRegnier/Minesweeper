@@ -24,8 +24,6 @@ class Board():
         self._unrevealed = 0
         self._tileSize = 32
 
-        State._gameover = False
-
         self.CreateBoard()
 
     def CreateBoard(self):
@@ -168,8 +166,36 @@ class Board():
         if State._gameover == False:
             if (mx >= self._x and mx <= self._x + self._width and my >= self._y and my <= self._y + self._height):
                 idx = self.GetTileHover(mx, my)
-                state = self._tiles[idx].Click(mtype)
-                State._gameover = state  # if it hits a mine then it will be true
+                tile = self._tiles[idx]
+
+                wasRevealed = tile.Click(mtype)
+                wasMine = tile.IsMine()
+
+                # TODO cascading should happen here instead of tile.
+                # update board state 
+                idx = 0
+                for t in self._tiles:
+                    self._state[idx] = t.GetState()
+                    idx += 1
+
+                if wasMine:
+                    State._gameover = True  # if it hits a mine then it will be true
+                else:
+                    win = True
+                    for s in self._state:
+                        if s == 10:  # unrevealed
+                            win = False
+                            break
+                    if win:
+                        State._win = win
+                        State._gameover = win
+
+                # print("Tile idx:", idx)
+                # print("Tile State:", tile.GetState())
+                # print("Tile was revealed?", wasRevealed)
+                # print("Tile was mine?", wasMine)
+
+                return wasRevealed
 
     def GetTileHover(self, mx, my):
         # cut down on computational time

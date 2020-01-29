@@ -14,7 +14,7 @@ class Tile():
 
         self._revealed = False
         self._flagged = False
-        self._state = -10
+        self._state = 10
 
         self._outercolor = 255
         self._innercolor = 200
@@ -124,12 +124,14 @@ class Tile():
         self._hover = True
 
     def Click(self, mtype):
+        wasRevealed = False
         if (self._revealed == False):
             if (mtype == 0):
                 self.Reveal()
+                wasRevealed = True
             elif (mtype == 1):
                 self.Flag()
-        return self._mine
+        return wasRevealed
 
     def Reset(self):
         self._flagged = False

@@ -8,3 +8,4 @@
 
 _gameover = False
 _restart = False
+_win = False

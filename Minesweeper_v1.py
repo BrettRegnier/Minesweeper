@@ -18,6 +18,71 @@ class Minesweeper_v1(gym.Env):
 
         self._actions = 0
 
+        # AI variables
+        self._steps = 0
+        self._wins = 0
+        self._losses = 0
+        
+
+    def step(self, action):
+        self._steps += 1
+        x = -1
+        y = -1
+        wasRevealed = False
+        reward = 0
+        done = False
+        tilesize = 32 # tile size of this board
+
+
+        x = tilesize/2 + (action % self._columns) * tilesize
+        # 20 is the margin from the top.
+        y = 20 + tilesize/2 + int(action % self._rows) * tilesize
+
+        # move the cursor if the graphics are on
+        self._cursor.SetPosition(x, y)
+        wasRevealed = self._board.Click(x, y, 0)
+
+        # update after click
+        self.Update()
+
+        #reward
+        reward = -0.3
+        if wasRevealed:
+            reward = 0.9
+        
+        done = False
+        if State._gameover and State._win:
+            reward = 1
+            done = True
+            self._wins += 1
+        elif State._gameover:
+            reward = -1
+            done = True
+            self._losses += 1
+
+        # unrevealed = 10
+        # revealed = 11
+        # mine = 12
+        # tile number = ##
+        # get state after update.
+        state = self._board._state
+
+        # print(action, "x:", x, "y:", y, "reward", reward, "done", done)
+
+        return state, reward, done, {}
+
+    def reset(self):
+        self.Restart(True)
+        print("losses:", self._losses, "wins:", self._wins)
+
+        return self._board._state
+
+    def render(self, mode="human", close=False):
+        if (mode == "human"):
+            if self._display is None:
+                self.InitGraphics()
+            self.Render()
+
     def Init(self):
         self._wWidth = 0
         self._wHeight = 0
@@ -131,13 +196,23 @@ class Minesweeper_v1(gym.Env):
 
         # gameover
         if State._gameover:
+            msg = "Gameover!"
+            if State._win:
+                msg = "Victory!"
             pygame.font.init()
+
             font = pygame.font.SysFont("Times New Roman", 42)
-            textSurface = font.render("Gameover", False, (240, 240, 240))
-            ow, oh = font.size("Gameover")
+            shadow = font.render(msg, True, (0, 0, 0))
+            text = font.render(msg, True, (240, 240, 240))
+            ow, oh = font.size(msg)
             px = self._wWidth/2 - ow/2
             py = (self._wHeight/2 - oh/2) - 20
-            self._screen.blit(textSurface, (px, py))
+
+            # shadow
+            self._screen.blit(shadow, (px + 2, py))
+
+            # acutal text
+            self._screen.blit(text, (px, py))
 
     def MouseHover(self):
         x, y = self._cursor.Click()
@@ -168,6 +243,7 @@ class Minesweeper_v1(gym.Env):
     def Restart(self, hard):
         State._restart = False
         State._gameover = False
+        State._win = False
         self._board.Reset(hard)
 
     def Play(self):
