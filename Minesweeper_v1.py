@@ -119,11 +119,13 @@ class Minesweeper_v1(gym.Env):
 		self._cursor.Update(tick)
 		
 		if State._gameover:
-			self.Restart(True)
+			self.Gameover()
 
 	def Draw(self):
 		for d in self._drawees:
 			d.Draw(self._screen, self._graphics)
+
+		# draw a gameover somewhere for humans players.
 
 	def MouseHover(self):
 		x, y = self._cursor.Click()
@@ -151,6 +153,7 @@ class Minesweeper_v1(gym.Env):
 		self._board.Click(x, y, mtype)
 
 	def Restart(self, hard):
+		self._drawGameOver = False
 		self._board.Reset(hard)
 
 	def Play(self):
@@ -170,4 +173,14 @@ class Minesweeper_v1(gym.Env):
 		self._display.update()
 
 	def Gameover(self):
-		pass
+		if self._human:
+			# draw a graphic...
+			self._drawGameOver = True
+
+			# TODO remove
+			self.Restart(True)
+			pass
+		else:
+			# if its a bot just restart
+			self.Restart(True)
+

@@ -132,7 +132,9 @@ class Tile():
 		return self._mine
 	
 	def Reset(self):
-		pass
+		self._flagged = False
+		self._revealed = False
+		self.SetState()
 	
 	def Reveal(self):
 		self.RevealSelf()

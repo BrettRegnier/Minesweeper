@@ -30,7 +30,10 @@ class Board():
 		x = 0
 		y = 0
 		total = self._rows * self._columns
+
 		self._unrevealed = total - self._mines
+		self._tiles = []
+		self._state = []
 		
 		count = 0
 		
@@ -174,3 +177,9 @@ class Board():
 
 	def Reset(self, hard):
 		State._gameover = False
+
+		if hard:
+			self.CreateBoard()
+		else:
+			for tile in self._tiles:
+				tile.Reset()
