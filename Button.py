@@ -27,13 +27,11 @@ class Button:
         screen.blit(textSurface, (self._x + 3, self._y + 2))
 
     def Update(self, tick):
-        pass
+        self._isHovering = False
 
     def MouseHover(self, mx, my):
         if (mx > self._x and mx < self._x + self._w and my > self._y and my < self._y + self._h):
             self._isHovering = True
-        else:
-            self._isHovering = False
 
     def Click(self, mx, my, mType):
         if (mx > self._x and mx < self._x + self._w and my > self._y and my < self._y + self._h and mType == 0):
