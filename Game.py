@@ -3,10 +3,10 @@ from Broom import Broom
 
 
 def main():
-    ms = Minesweeper_v1(human=False)
-    # ms.Play()
-    broom = Broom(ms)
-    broom.Train(50000)
+    ms = Minesweeper_v1(human=True)
+    ms.Play()
+    # broom = Broom(ms)
+    # broom.Train(50000)
 
 
 if __name__ == "__main__":
