@@ -10,71 +10,70 @@ import State
 
 
 class Minesweeper_v1(gym.Env):
-    def __init__(self, human):
+    def __init__(self, human, difficulty):
         super(Minesweeper_v1, self).__init__()
         self._human = human  # true or false
         self.Init()
-        self.InitGame(0)
+        self.InitGame(difficulty)
 
         self._actions = 0
 
         # AI variables
         self._steps = 0
-        self._wins = 0
-        self._losses = 0
-        
 
     def step(self, action):
         self._steps += 1
         x = -1
         y = -1
-        wasRevealed = False
+        was_revealed = False
         reward = 0
         done = False
-        tilesize = 32 # tile size of this board
+        win = False
+        tile_size = 32 # tile size of this board
 
 
-        x = tilesize/2 + (action % self._columns) * tilesize
+        x = tile_size//2 + (action % self._columns) * tile_size
         # 20 is the margin from the top.
-        y = 20 + tilesize/2 + int(action % self._rows) * tilesize
+        y = 20 + tile_size//2 + action//self._columns * tile_size
 
         # move the cursor if the graphics are on
         self._cursor.SetPosition(x, y)
-        wasRevealed = self._board.Click(x, y, 0)
 
-        # update after click
-        self.Update()
+        was_revealed = self._board.Click(x, y, 0)
 
         #reward
         reward = -0.3
-        if wasRevealed:
+        if was_revealed:
             reward = 0.9
         
         done = False
         if State._gameover and State._win:
-            reward = 1
+            reward = 2
             done = True
-            self._wins += 1
-        elif State._gameover:
+            win = True
+            print("****win**** - ", end="")
+        elif State._gameover: # or self._steps == (self._columns * self._rows) - self._mines:
             reward = -1
             done = True
-            self._losses += 1
+            self._win = False
+            print("lose ", end="")
 
         # unrevealed = 10
         # revealed = 11
         # mine = 12
         # tile number = ##
         # get state after update.
+        
+        self.Update()
         state = self._board._state
 
-        # print(action, "x:", x, "y:", y, "reward", reward, "done", done)
+        # print("action:", action, "x:", x, "y:", y, "reward", reward, "done", done)
 
-        return state, reward, done, {}
+        return state, reward, done, win
 
     def reset(self):
         self.Restart(True)
-        print("losses:", self._losses, "wins:", self._wins)
-
+        self._steps = 0
         return self._board._state
 
     def render(self, mode="human", close=False):
@@ -103,41 +102,19 @@ class Minesweeper_v1(gym.Env):
         self._drawees = []
 
     def InitGame(self, difficulty):
-        self._clock = pygame.time.Clock()
+        if self._human:
+            self._clock = pygame.time.Clock()
         self._fps = 60
-
+        assert difficulty > 0
         size = 32
-        mines = 0
-        rows = 0
-        columns = 0
+        rows = int(6 * difficulty + 2)
+        columns = int(11 * difficulty - difficulty**2)
+        mines = int(((0.006895 * difficulty**2) + 0.013045 * difficulty + 0.10506) * (rows * columns))
         mHeight = 20
-        if difficulty == 0:
-            mines = 10  # easy
-            rows = 8
-            columns = 10
-        elif difficulty == 1:
-            mines = 40  # medium
-            rows = 14
-            columns = 18
-        elif difficulty == 2:
-            mines = 99  # hard
-            rows = 20
-            columns = 24
-        elif difficulty == 3:
-            mines = 6  # very easy
-            rows = 5
-            columns = 7
-        elif difficulty == 4:
-            mines = 3  # extra very easy
-            rows = 3
-            columns = 4
-        elif difficulty == 5:
-            mines = 1  # ultra instinct easy
-            rows = 2
-            columns = 3
 
         self._columns = columns
         self._rows = rows
+        self._mines = mines
 
         self._wWidth = columns * 32
         self._wHeight = rows * 32 + mHeight
@@ -155,9 +132,12 @@ class Minesweeper_v1(gym.Env):
                             mines)
 
         total = rows * columns
-        self._observationSpace = spaces.Box(
+        self.action_space = spaces.Discrete(total)
+        self.observation_space = spaces.Box(
             low=0, high=9, shape=(1, total), dtype=np.int32)
-        self._actionSpace = spaces.Discrete(total)
+
+        print(self.action_space)
+        print(self.observation_space)
 
     def InitGraphics(self):
         pygame.display.init()
@@ -179,7 +159,9 @@ class Minesweeper_v1(gym.Env):
         self._drawees.append(self._cursor)
 
     def Update(self):
-        tick = self._clock.tick(self._fps)
+        tick = 0
+        if self._human:
+            tick = self._clock.tick(self._fps)
 
         self._menu.Update(tick)
         self._board.Update(tick)
@@ -188,7 +170,7 @@ class Minesweeper_v1(gym.Env):
         if State._gameover:
             self.Gameover()
         if State._restart:
-            self.Restart(True)
+            self.reset()
 
     def Draw(self):
         for d in self._drawees:
@@ -237,7 +219,11 @@ class Minesweeper_v1(gym.Env):
 
     def Click(self, mtype):
         x, y = self._cursor.Click()
-        self._board.Click(x, y, mtype)
+        action = self._board.GetTileHover(x, y)
+        if action != -1 and mtype == 0:
+            self.step(action)
+        else:
+            self._board.Click(x, y, mtype)
         self._menu.Click(x, y, mtype)
 
     def Restart(self, hard):
@@ -261,6 +247,9 @@ class Minesweeper_v1(gym.Env):
         self.Draw()
 
         self._display.update()
+
+    def IsWin(self):
+        return self._win
 
     def Gameover(self):
         if self._human == False:

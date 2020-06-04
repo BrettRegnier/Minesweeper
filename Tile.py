@@ -131,7 +131,7 @@ class Tile():
                 wasRevealed = True
             elif (mtype == 1):
                 self.Flag()
-        return wasRevealed
+        return wasRevealed, self.IsMine()
 
     def Reset(self):
         self._flagged = False
@@ -141,8 +141,8 @@ class Tile():
     def Reveal(self):
         self.RevealSelf()
 
-        if (self._nearbyMines == 0 and not self._mine):
-            self.CascadeReveal()
+        # if (self._nearbyMines == 0 and not self._mine):
+        #     self.CascadeReveal()
 
     def RevealSelf(self):
         self._revealed = True

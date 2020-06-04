@@ -3,6 +3,7 @@ import random
 from Tile import Tile
 import State
 
+
 # TODO make game state class that is global.
 
 
@@ -158,51 +159,61 @@ class Board():
             tile.Draw(screen, graphics)
 
     def MouseHover(self, mx, my):
-        if (mx >= self._x and mx <= self._x + self._width and my >= self._y and my <= self._y + self._height):
-            idx = self.GetTileHover(mx, my)
+        return
+        idx = self.GetTileHover(mx, my)
+        if idx >= 0:
             self._tiles[idx].MouseHover()
 
     def Click(self, mx, my, mtype):
+        was_revealed = False
+        is_mine = False # technically win condition should be handled outside of this class.
         if State._gameover == False:
-            if (mx >= self._x and mx <= self._x + self._width and my >= self._y and my <= self._y + self._height):
-                idx = self.GetTileHover(mx, my)
-                tile = self._tiles[idx]
+            idx = self.GetTileHover(mx, my)
+            if (idx >= 0):
+                if mtype == 0:
+                    queue = [self._tiles[idx]]
+                    while len(queue) > 0:
+                        tile = queue.pop(0)
+                        revealed, is_mine = tile.Click(mtype)
+                        if tile._nearbyMines == 0 and not tile.IsMine():
+                            for adj in tile._adjTiles:
+                                if adj != None and not adj.Revealed():
+                                    queue.append(adj)
+                        if revealed:
+                            self._unrevealed -= 1
+                            was_revealed = True
+                else:
+                    self._tiles[idx].Click(mtype)
 
-                wasRevealed = tile.Click(mtype)
-                wasMine = tile.IsMine()
-
-                # TODO cascading should happen here instead of tile.
-                # update board state 
                 idx = 0
                 for t in self._tiles:
                     self._state[idx] = t.GetState()
                     idx += 1
 
-                if wasMine:
+                # game over condition
+                if is_mine:
                     State._gameover = True  # if it hits a mine then it will be true
-                else:
-                    win = True
-                    for s in self._state:
-                        if s == 10:  # unrevealed
-                            win = False
-                            break
-                    if win:
-                        State._win = win
-                        State._gameover = win
+                elif self._unrevealed == 0:
+                        State._win = True
+                        State._gameover = True
 
                 # print("Tile idx:", idx)
                 # print("Tile State:", tile.GetState())
-                # print("Tile was revealed?", wasRevealed)
+                # print("Tile was revealed?", was_revealed)
                 # print("Tile was mine?", wasMine)
 
-                return wasRevealed
+        return was_revealed
 
     def GetTileHover(self, mx, my):
         # cut down on computational time
         # rows * columns + index
-        column = int((mx - self._x) / self._tileSize)
-        row = int((my - self._y) / self._tileSize)
-        return row * self._columns + column
+        if (mx >= self._x and mx <= self._x + self._width and my >= self._y and my <= self._y + self._height):
+            column = (mx - self._x) // self._tileSize
+            row = (my - self._y) // self._tileSize
+            # print("column: ", column, "row: ", row)
+            idx = row * self._columns + column
+            return int(idx)
+        return -1
 
     def Reset(self, hard):
         State._gameover = False
