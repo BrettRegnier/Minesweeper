@@ -19,7 +19,7 @@ _epsilon_decay = 0.999
 
 _solved_win_count = 25
 
-_human = True
+_human = False
 _difficulty = 1.0
 
 # how many games to play before copying
@@ -32,9 +32,9 @@ _sync_target = 150
 def main():
     if _human:
         env = Minesweeper_v1(human=_human, difficulty=_difficulty)
-        env = Minesweeper_Text_v0(3)
         env.Play()
     else:
+        env = Minesweeper_Text_v0(_difficulty)
         device = torch.device("cuda")
         net = BroomDQL.BroomDQL(
             env.observation_space.shape, env.action_space.n).to(device)
@@ -51,6 +51,7 @@ def main():
         steps = 0
         total_steps = 0
         games = 0
+        solved_games = 0
 
         consecutive_wins = 0
 
@@ -61,8 +62,8 @@ def main():
                 total_rewards.append(reward)
                 # get mean of last 100 rewards
                 mean_reward = np.mean(total_rewards[-100:])
-                print("done %d games, %d steps, reward %.3f, eps %.2f" %
-                      (games, steps, mean_reward, epsilon))
+                print("- games: %d, steps: %d, reward: %.3f, eps: %.2f, solved games: %d" %
+                      (games, steps, mean_reward, epsilon, solved_games))
 
                 if best_mean_reward is None or best_mean_reward < mean_reward:
                     # torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
@@ -97,6 +98,10 @@ def main():
             if consecutive_wins == _solved_win_count:
                 print("solved!")
                 torch.save(net.state_dict(), "minesweeper-best.dat")
+                consecutive_wins = 0
+                epsilon = .50
+                solved_games += 1
+                agent.Reset(False)
 
 
 def CalculateLoss(batch, net, target_net, device='cpu'):

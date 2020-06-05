@@ -11,7 +11,7 @@ This project was designed to help me learn how to make deep reinforcement learni
 ## Technologies
 Project is created with:
 * Python v3.7.x
-* Tensorflow v2.1.0
-* Keras v2.3.1
+* Pygame 1.9.6
+* PyTorch 1.5
+* OpenAI Gym 0.15.4
 * CUDA Toolkit v10.1
-* NVIDIA cuDNN v7.6.5

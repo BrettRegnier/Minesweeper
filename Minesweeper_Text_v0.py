@@ -88,10 +88,10 @@ class Minesweeper_Text_v0(gym.Env):
         if soft and self._board is not None:
             for tile in self._board:
                 tile[STATE] = UNREVEALED_TILE
-
         else:
+            self._board = []
+            
             mine_indices = []
-
             to_make_mine = self._mines
             choices = [c for c in range(self._rows * self._columns)]
             while to_make_mine > 0:
@@ -100,7 +100,6 @@ class Minesweeper_Text_v0(gym.Env):
                 choices.remove(idx)
                 to_make_mine -= 1
 
-            self._board = []
             for row in range(self._rows):
                 for column in range(self._columns):
                     neighbours = []

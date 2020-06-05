@@ -19,3 +19,16 @@ for minefinder ai, needs all actions as tiles and then we need to determine the 
 that is a mine, and therefore choose the lowest probability option
 
 Or rather during training we want it to find the mine.
+
+
+
+
+
+
+-- Do this next:
+    -Change the memories to be recorded based on the games not the steps
+    -Learn on a certain amount of games and their steps instead of steps alone
+
+    -Saving of boards.
+    -Saving of replays.
+    -Displaying of replays.
