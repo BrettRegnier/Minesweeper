@@ -12,6 +12,7 @@ class Memory:
     def append(self, experience):
         self._buffer.append(experience)
 
+    # i might need to change this so each match is instead a full match instead
     def sample(self, batch_size):
         indices = np.random.choice(
             len(self._buffer), batch_size, replace=False)

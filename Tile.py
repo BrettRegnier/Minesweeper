@@ -2,15 +2,15 @@ from pygame import font
 
 
 class Tile():
-    def __init__(self, x, y, size, tid):
+    def __init__(self, x, y, size, tid, neighbours, neighbouring_mines):
         self._x = x
         self._y = y
         self._size = size
         self._id = tid
 
         self._mine = False
-        self._nearbyMines = 0
-        self._adjTiles = []
+        self._neighbours = neighbours
+        self._neighbouring_mines = neighbouring_mines
 
         self._revealed = False
         self._flagged = False
@@ -21,6 +21,7 @@ class Tile():
         self._revealedcolor = 180
         self._outline = 100
         self._textcolor = (0, 0, 0)
+        self.SetTextColourOnMines()
 
         self._hover = False
 
@@ -71,9 +72,9 @@ class Tile():
                               (lstart[0], lend[1]),
                               3)
 
-            elif (self._nearbyMines > 0):
+            elif (self._neighbouring_mines > 0):
                 # mines nearby
-                textSurface = self._font.render(str(self._nearbyMines),
+                textSurface = self._font.render(str(self._neighbouring_mines),
                                                 False,
                                                 self._textcolor)
 
@@ -124,14 +125,14 @@ class Tile():
         self._hover = True
 
     def Click(self, mtype):
-        wasRevealed = False
+        was_revealed = False
         if (self._revealed == False):
             if (mtype == 0):
                 self.Reveal()
-                wasRevealed = True
+                was_revealed = True
             elif (mtype == 1):
                 self.Flag()
-        return wasRevealed, self.IsMine()
+        return was_revealed, self.IsMine()
 
     def Reset(self):
         self._flagged = False
@@ -139,19 +140,8 @@ class Tile():
         self.SetState()
 
     def Reveal(self):
-        self.RevealSelf()
-
-        # if (self._nearbyMines == 0 and not self._mine):
-        #     self.CascadeReveal()
-
-    def RevealSelf(self):
         self._revealed = True
         self.SetState()
-
-    def CascadeReveal(self):
-        for tile in self._adjTiles:
-            if (tile is not None and not tile.Revealed()):
-                tile.Reveal()
 
     def Revealed(self):
         return self._revealed
@@ -172,32 +162,29 @@ class Tile():
     def SetState(self):
         if self._revealed:
             if self._mine:
-                self._state = 11  # revealed mine
-            else:
-                self._state = self._nearbyMines
+                self._state = 12  # revealed mine
+            elif self._neighbouring_mines == 0:
+                self._state = 11 # revealed tile
+            else:    
+                self._state = self._neighbouring_mines
         else:
             self._state = 10  # unrevealed
 
-    def AdjacentTiles(self, adj):
-        self._adjTiles = adj
-
-        for tile in self._adjTiles:
-            if (tile is not None and tile.IsMine()):
-                self._nearbyMines = self._nearbyMines + 1
-
+    def SetTextColourOnMines(self):
         if (self._mine == False):
             # skipping == 1 because its default color.
-            if self._nearbyMines == 2:
+            if self._neighbouring_mines == 2:
                 self._textcolor = (71, 92, 68)
-            elif self._nearbyMines == 3:
+            elif self._neighbouring_mines == 3:
                 self._textcolor = (226, 78, 27)
-            elif self._nearbyMines == 4:
+            elif self._neighbouring_mines == 4:
                 self._textcolor = (135, 61, 72)
-            elif self._nearbyMines == 5:
+            elif self._neighbouring_mines == 5:
                 self._textcolor = (25, 12, 14)
-            elif self._nearbyMines == 6:
+            elif self._neighbouring_mines == 6:
                 self._textcolor = (63, 48, 71)
-            elif self._nearbyMines == 7:
+            elif self._neighbouring_mines == 7:
                 self._textcolor = (140, 75, 92)
-            elif self._nearbyMines == 8:
+            elif self._neighbouring_mines == 8:
                 self._textcolor = (53, 129, 184)
+            

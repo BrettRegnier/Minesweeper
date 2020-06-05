@@ -20,6 +20,7 @@ class Minesweeper_v1(gym.Env):
 
         # AI variables
         self._steps = 0
+        self._first_click = True
 
     def step(self, action):
         self._steps += 1
@@ -45,10 +46,12 @@ class Minesweeper_v1(gym.Env):
         reward = -0.3
         if was_revealed:
             reward = 0.9
+
+        # reward = 0
         
         done = False
         if State._gameover and State._win:
-            reward = 2
+            reward = 1
             done = True
             win = True
             print("****win**** - ", end="")
@@ -63,10 +66,14 @@ class Minesweeper_v1(gym.Env):
         # mine = 12
         # tile number = ##
         # get state after update.
-        
         self.Update()
-        state = self._board._state
+        state = self.State()
 
+        if self._first_click:
+            self._first_click = False
+            reward = 0
+        
+        # print(state)
         # print("action:", action, "x:", x, "y:", y, "reward", reward, "done", done)
 
         return state, reward, done, win
@@ -74,7 +81,8 @@ class Minesweeper_v1(gym.Env):
     def reset(self):
         self.Restart(True)
         self._steps = 0
-        return self._board._state
+        self._first_click = True
+        return self.State()
 
     def render(self, mode="human", close=False):
         if (mode == "human"):
@@ -134,7 +142,9 @@ class Minesweeper_v1(gym.Env):
         total = rows * columns
         self.action_space = spaces.Discrete(total)
         self.observation_space = spaces.Box(
-            low=0, high=9, shape=(1, total), dtype=np.int32)
+            low=0, high=12, shape=(1, rows, columns), dtype=np.float32)
+        # self.observation_space = spaces.Box(
+        #     low=0, high=12, shape=(1, total), dtype=np.float32)
 
         print(self.action_space)
         print(self.observation_space)
@@ -247,6 +257,19 @@ class Minesweeper_v1(gym.Env):
         self.Draw()
 
         self._display.update()
+
+    def State(self):
+        # tiles_2d = np.reshape(self._board._tiles, (-1, self._columns))
+        state = []
+        for tile in self._board._tiles:
+            state.append(tile.GetState())
+
+        state_np = np.array(state, dtype=np.float32)
+        state_np = np.reshape(state_np, (-1, self._columns))
+        state_np = np.expand_dims(state_np, axis=0)
+        # print(state_np)
+        # exit()
+        return state_np
 
     def IsWin(self):
         return self._win

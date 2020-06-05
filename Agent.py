@@ -18,8 +18,10 @@ class Agent:
         self._state = self._env.reset()
         self._total_reward = 0
 
+# add a tracking to what match this memory was
+# extend the memory tuple object
     @torch.no_grad()
-    def PlayStep(self, net, epsilon=0.0, device="cpu"):
+    def PlayStep(self, net, steps, epsilon=0.0, device="cpu"):
         done_reward = None
         win = False
 
@@ -35,13 +37,15 @@ class Agent:
 
         #step
         next_state, reward, done, win = self._env.step(action)
+            
 
-        # self._env.render()
+        self._env.render()
         self._total_reward += reward
 
         experience = Experience(self._state, action, reward, done, next_state)
-        self._memory.append(experience)
-        self.state = next_state
+        if not (steps == 0 and done):
+            self._memory.append(experience)
+        self._state = next_state
 
         if done:
             done_reward = self._total_reward

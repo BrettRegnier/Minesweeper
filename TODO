@@ -11,3 +11,6 @@ Have the board deal with revealing other tiles based on idx
 Note:
     Made this change to my core.py of keras-rl
     https://github.com/keras-rl/keras-rl/issues/161
+
+Neural network to first decide which tiles MAY have a mine, via using convolutional NN on each tile... 
+Train on a single tile and its neighbours?
