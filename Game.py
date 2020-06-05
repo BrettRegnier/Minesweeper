@@ -1,4 +1,5 @@
 from Minesweeper_v1 import Minesweeper_v1
+from Minesweeper_Text_v0 import Minesweeper_Text_v0
 import BroomDQL
 import Memory
 import Agent
@@ -9,16 +10,16 @@ import torch.optim as optim
 import numpy as np
 
 _gamma = .99
-_batch_size = 200
+_batch_size = 100
 _memory_size = 1000
 _learning_rate = 1e-4
 _epsilon_start = 1.0
 _epsilon_final = 0.01
-_epsilon_decay = 0.9999
+_epsilon_decay = 0.999
 
 _solved_win_count = 25
 
-_human = False
+_human = True
 _difficulty = 1.0
 
 # how many games to play before copying
@@ -29,8 +30,9 @@ _sync_target = 150
 # therefore I should connect the cells, and their neighbours, and send in as a convolution
 
 def main():
-    env = Minesweeper_v1(human=_human, difficulty=_difficulty)
     if _human:
+        env = Minesweeper_v1(human=_human, difficulty=_difficulty)
+        env = Minesweeper_Text_v0(3)
         env.Play()
     else:
         device = torch.device("cuda")
@@ -64,8 +66,8 @@ def main():
 
                 if best_mean_reward is None or best_mean_reward < mean_reward:
                     # torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
-                    print("Best reward updated %.3f -> %.3f" %
-                          (best_mean_reward, mean_reward))
+                    # print("Best reward updated %.3f -> %.3f" %
+                    #       (best_mean_reward, mean_reward))
                     best_mean_reward = mean_reward
 
                 if win:
@@ -84,7 +86,7 @@ def main():
 
             if total_steps % _sync_target == 0:
                 target_net.load_state_dict(net.state_dict())
-                print("load target")
+                # print("load target")
 
             optimizer.zero_grad()
             batch = memory.sample(_batch_size)

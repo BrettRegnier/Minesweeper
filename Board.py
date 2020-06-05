@@ -88,9 +88,9 @@ class Board():
     def Update(self, tick):
         for tile in self._tiles:
             tile.Update(tick)
-        if State._gameover:
-            for tile in self._tiles:
-                tile.Reveal()
+        # if State._gameover:
+        #     for tile in self._tiles:
+        #         tile.Reveal()
 
     def Draw(self, screen, graphics):
         for tile in self._tiles:
@@ -121,6 +121,7 @@ class Board():
                                         queue.append(adj)
                         if revealed:
                             self._unrevealed -= 1
+                            # print(self._unrevealed)
                             was_revealed = True
                 else:
                     self._tiles[idx].Click(mtype)
@@ -156,5 +157,6 @@ class Board():
         if hard:
             self.CreateBoard()
         else:
+            self._unrevealed = self._columns * self._rows - self._mines
             for tile in self._tiles:
                 tile.Reset()

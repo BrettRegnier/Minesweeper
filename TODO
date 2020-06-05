@@ -14,3 +14,8 @@ Note:
 
 Neural network to first decide which tiles MAY have a mine, via using convolutional NN on each tile... 
 Train on a single tile and its neighbours?
+
+for minefinder ai, needs all actions as tiles and then we need to determine the probability
+that is a mine, and therefore choose the lowest probability option
+
+Or rather during training we want it to find the mine.

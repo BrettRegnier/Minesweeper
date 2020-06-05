@@ -21,6 +21,8 @@ class BroomDQL(nn.Module):
         self._fc = nn.Sequential(
             nn.Linear(conv_out_shape, 512),
             nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
             nn.Linear(512, n_actions)
         )
 

@@ -58,7 +58,6 @@ class Minesweeper_v1(gym.Env):
         elif State._gameover: # or self._steps == (self._columns * self._rows) - self._mines:
             reward = -1
             done = True
-            self._win = False
             print("lose ", end="")
 
         # unrevealed = 10
@@ -79,7 +78,7 @@ class Minesweeper_v1(gym.Env):
         return state, reward, done, win
 
     def reset(self):
-        self.Restart(True)
+        self.Restart(False)
         self._steps = 0
         self._first_click = True
         return self.State()
@@ -263,7 +262,7 @@ class Minesweeper_v1(gym.Env):
         state = []
         for tile in self._board._tiles:
             state.append(tile.GetState())
-
+            
         state_np = np.array(state, dtype=np.float32)
         state_np = np.reshape(state_np, (-1, self._columns))
         state_np = np.expand_dims(state_np, axis=0)
