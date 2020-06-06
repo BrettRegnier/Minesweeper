@@ -9,6 +9,8 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 
+import os
+
 _gamma = .99
 _batch_size = 100
 _memory_size = 1000
@@ -40,7 +42,7 @@ def main():
             env.observation_space.shape, env.action_space.n).to(device)
         target_net = BroomDQL.BroomDQL(
             env.observation_space.shape, env.action_space.n).to(device)
-            
+
         if os.path.isfile("./minesweeper-best.dat"):
             net.load_state_dict(torch.load("./minesweeper-best.dat"))
             target_net.load_state_dict(torch.load("./minesweeper-best.dat"))
