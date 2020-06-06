@@ -40,6 +40,11 @@ def main():
             env.observation_space.shape, env.action_space.n).to(device)
         target_net = BroomDQL.BroomDQL(
             env.observation_space.shape, env.action_space.n).to(device)
+            
+        if os.path.isfile("./minesweeper-best.dat"):
+            net.load_state_dict(torch.load("./minesweeper-best.dat"))
+            target_net.load_state_dict(torch.load("./minesweeper-best.dat"))
+            print("loaded")
 
         memory = Memory.Memory(_memory_size)
         agent = Agent.Agent(env, memory)
@@ -99,7 +104,7 @@ def main():
                 print("solved!")
                 torch.save(net.state_dict(), "minesweeper-best.dat")
                 consecutive_wins = 0
-                epsilon = .50
+                epsilon = .99999
                 solved_games += 1
                 agent.Reset(False)
 

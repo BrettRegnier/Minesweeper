@@ -26,6 +26,8 @@ class Minesweeper_Text_v0(gym.Env):
         self._unrevealed_remaining = UNREVEALED_TILE
 
         self._first_action = True
+        self._steps = 0
+        self._MAX_STEPS = (self._rows * self._columns) - self._mines
 
         self.action_space = spaces.Discrete(self._rows * self._columns)
         self.observation_space = spaces.Box(
@@ -40,8 +42,8 @@ class Minesweeper_Text_v0(gym.Env):
         win = False
         reward = -0.3
 
-        # check if mine
-        if tile[IS_MINE] == True:
+        # check if mine or out of steps
+        if tile[IS_MINE] == True or self._steps >= self._MAX_STEPS:
             done = True
             reward = -1
             tile[STATE] = MINE_TILE
@@ -77,6 +79,8 @@ class Minesweeper_Text_v0(gym.Env):
             reward = 0
         self._first_action = False
 
+        self._steps += 1
+
         state = self.State()
 
         # print(state, reward, done, win)
@@ -85,12 +89,14 @@ class Minesweeper_Text_v0(gym.Env):
     def reset(self, soft=True):
         self._unrevealed_remaining = (self._rows * self._columns) - self._mines
         self._first_action = True
+        self._steps = 0
+
         if soft and self._board is not None:
             for tile in self._board:
                 tile[STATE] = UNREVEALED_TILE
         else:
             self._board = []
-            
+
             mine_indices = []
             to_make_mine = self._mines
             choices = [c for c in range(self._rows * self._columns)]
