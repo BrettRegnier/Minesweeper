@@ -12,12 +12,12 @@ import numpy as np
 import os
 
 _gamma = .99
-_batch_size = 100
-_memory_size = 1000
+_batch_size = 1000
+_memory_size = 10000
 _learning_rate = 1e-4
 _epsilon_start = 1.0
 _epsilon_final = 0.01
-_epsilon_decay = 0.999
+_epsilon_decay = 0.9999
 
 _solved_win_count = 25
 
