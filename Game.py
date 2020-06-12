@@ -11,13 +11,13 @@ import numpy as np
 
 import os
 
-_gamma = .99
+_gamma = .997
 _batch_size = 1000
 _memory_size = 10000
 _learning_rate = 1e-4
 _epsilon_start = 1.0
 _epsilon_final = 0.01
-_epsilon_decay = 0.9999
+_epsilon_decay = 0.99999
 
 _solved_win_count = 25
 
@@ -25,7 +25,7 @@ _human = False
 _difficulty = 1.0
 
 # how many games to play before copying
-_sync_target = 150
+_sync_target = 10000
 
 
 # Perhpas the issues is the lack of symantic meaning to each of the numbers.
@@ -73,9 +73,9 @@ def main():
                       (games, steps, mean_reward, epsilon, solved_games))
 
                 if best_mean_reward is None or best_mean_reward < mean_reward:
-                    # torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
-                    # print("Best reward updated %.3f -> %.3f" %
-                    #       (best_mean_reward, mean_reward))
+                    torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
+                    print("Best reward updated %.3f -> %.3f" %
+                          (best_mean_reward, mean_reward))
                     best_mean_reward = mean_reward
 
                 if win:
@@ -104,11 +104,8 @@ def main():
 
             if consecutive_wins == _solved_win_count:
                 print("solved!")
-                torch.save(net.state_dict(), "minesweeper-best.dat")
-                consecutive_wins = 0
-                epsilon = .99999
-                solved_games += 1
-                agent.Reset(False)
+                torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
+                exit()
 
 
 def CalculateLoss(batch, net, target_net, device='cpu'):

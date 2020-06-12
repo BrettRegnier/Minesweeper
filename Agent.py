@@ -14,8 +14,8 @@ class Agent:
         self._memory = memory
         self.Reset()
 
-    def Reset(self, soft=True):
-        self._state = self._env.reset(soft)
+    def Reset(self, soft=False):
+        self._state = self._env.reset(soft=soft)
         self._total_reward = 0
 
 # add a tracking to what match this memory was

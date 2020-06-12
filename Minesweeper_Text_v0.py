@@ -86,7 +86,7 @@ class Minesweeper_Text_v0(gym.Env):
         # print(state, reward, done, win)
         return state, reward, done, win
 
-    def reset(self, soft=True):
+    def reset(self, soft=False):
         self._unrevealed_remaining = (self._rows * self._columns) - self._mines
         self._first_action = True
         self._steps = 0
