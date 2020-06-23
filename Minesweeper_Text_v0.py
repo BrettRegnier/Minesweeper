@@ -157,13 +157,12 @@ class Minesweeper_Text_v0(gym.Env):
             states.append(t[STATE])
             # neighbours.append(t[NEIGHBOURS])
         state_np = np.array(states, dtype=np.float32)
-
+        
         # convolution
         state_np = np.reshape(state_np, (-1, self._columns))
         state_np = np.expand_dims(state_np, axis=0)
 
-        # print(state)
-
+        # print(state_np)
         return state_np
 
     def GetAction(self, row, column):

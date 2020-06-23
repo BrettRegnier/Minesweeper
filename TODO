@@ -36,3 +36,6 @@ Or rather during training we want it to find the mine.
 
     -- Another idea, is that I take the basic state data, and then with that we find the neighbours and the neighbours neighbours maybe even Neighbours neighbours neighbour to give context around what a tile could be
         -- output of this nn would be the probability of the tile being a mine. Next 
+        
+    -- Another idea - Use a binary classifier to build a map of what is and isnt a mine that is trained on clicks
+        and then use the output as a the input to a q network and make a decision on what to click.
