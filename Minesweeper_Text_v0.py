@@ -47,7 +47,7 @@ class Minesweeper_Text_v0(gym.Env):
             done = True
             reward = -1
             tile[STATE] = MINE_TILE
-            print("lose", end=" ")
+            # print("lose", end=" ")
 
         # check if unrevealed
         if tile[STATE] == UNREVEALED_TILE and not done:
@@ -73,7 +73,7 @@ class Minesweeper_Text_v0(gym.Env):
             done = True
             win = True
             reward = 1
-            print("--win--", end=" ")
+            # print("--win--", end=" ")
 
         if self._first_action and done:
             reward = 0

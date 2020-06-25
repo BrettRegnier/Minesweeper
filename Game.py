@@ -8,13 +8,13 @@ import numpy as np
 import os
 
 _gamma = .997
-_batch_size = 100
-_lg_batch_size = 64
+_batch_size = 1000
+_lg_batch_size = 1000
 _memory_size = 10000
 _learning_rate = 1e-4
 _epsilon_start = 1.0
 _epsilon_final = 0.01
-_epsilon_decay = 0.99999
+_epsilon_decay = 0.999
 
 _solved_win_count = 25
 
@@ -131,6 +131,7 @@ def main():
         
         lg_optimizer = optim.Adam(lg_net.parameters(), lr=_learning_rate)
         lg_criterion = nn.CrossEntropyLoss()
+        lg_train_acc = 0.0
         
         dql_net = BroomDQL(env.observation_space.shape, env.action_space.n).to(device)
         dql_target_net = BroomDQL(env.observation_space.shape, env.action_space.n).to(device)
@@ -166,75 +167,108 @@ def main():
         # ex. pred = [0.11, 2.0]
         # ex. label = [1]
         while True:
-            env_state, action, reward, done, done_reward, win = dql_agent.PlayStep(dql_net, lg_state, steps, epsilon, device)
+            # env_state, action, reward, done, done_reward, win = dql_agent.PlayStep(dql_net, lg_state, steps, epsilon, device)
             
-            lg_map, lg_next_state, lg_predictions = lg_agent.ReadBoard(lg_net, device)
+            env_state, action, done, win = lg_agent.PlayStep(lg_map)
+            lg_map, lg_next_state = lg_agent.ReadBoard(lg_net, device)
             
             # record experiences
-            dql_agent.AddMemory(lg_state, action, reward, done, lg_next_state)
-            lg_agent.AddMemory(lg_map, lg_state, lg_predictions, action, env_state)
+            # dql_agent.AddMemory(lg_state, action, reward, done, lg_next_state)
+            
+            lg_agent.AddMemory(lg_map, lg_state, action, env_state)
             
             # update the curr state to the next state
             lg_state = lg_next_state
             
-            if done_reward is not None:
-                total_rewards.append(done_reward)
-                # get mean of last 100 rewards
-                mean_reward = np.mean(total_rewards[-100:])
-                print("- games: %d, steps: %d, reward: %.3f, eps: %.2f, solved games: %d" %
-                      (games, steps, mean_reward, epsilon, solved_games))
+            # if done_reward is not None:
+            #     total_rewards.append(done_reward)
+            #     # get mean of last 100 rewards
+            #     if win: 
+            #         print("--win--", end=" ")
+            #     else:
+            #         print("lose", end=" ")
+            #     mean_reward = np.mean(total_rewards[-100:])
+            #     print("- games: %d, steps: %d, reward: %.3f, eps: %.2f, solved games: %d" %
+            #           (games, steps, mean_reward, epsilon, solved_games))
 
-                if best_mean_reward is None or best_mean_reward < mean_reward:
-                    torch.save(dql_net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
-                    print("Best reward updated %.3f -> %.3f" %
-                          (best_mean_reward, mean_reward))
-                    best_mean_reward = mean_reward
+            #     if best_mean_reward is None or best_mean_reward < mean_reward:
+            #         # torch.save(dql_net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
+            #         print("Best reward updated %.3f -> %.3f" %
+            #               (best_mean_reward, mean_reward))
+            #         best_mean_reward = mean_reward
 
-                if win:
-                    consecutive_wins += 1
-                else:
-                    consecutive_wins = 0
+            #     if win:
+            #         consecutive_wins += 1
+            #     else:
+            #         consecutive_wins = 0
 
-                steps = 0
-                games += 1
-                epsilon = max(_epsilon_final, epsilon * _epsilon_decay)
+            #     steps = 0
+            #     games += 1
+            #     epsilon = max(_epsilon_final, epsilon * _epsilon_decay)
             
             steps += 1
             total_steps += 1
-            if len(lg_memory) < _lg_batch_size or len(dql_memory) < _batch_size:
+            if len(lg_memory) < _lg_batch_size:
                 continue
+            # if len(dql_memory) < _batch_size:
+            #     continue
             
-            if total_steps % _sync_target == 0:
-                target_net.load_state_dict(net.state_dict())
+            # if total_steps % _sync_target == 0:
+            #     target_net.load_state_dict(net.state_dict())
             
             # optimize
             # lg first
             lg_optimizer.zero_grad()
-            lg_batch = lg_memory.sample(_batch_size)
+            lg_batch = lg_memory.sample(_lg_batch_size)
+            inputs, labels = lg_batch
+            inputs_t = torch.tensor(np.array(inputs, dtype=np.float32)).to(device)
+            outputs = lg_net(inputs_t)
+            labels_t = torch.tensor(labels, dtype=torch.int64).to(device)
             
-            loss = CalculateLGLoss(lg_batch, lg_criterion, lg_net, device)
             
+            lg_loss = lg_criterion(outputs, labels_t)
+            lg_loss.backward()
+            lg_optimizer.step()
+            
+            # accuracy
+            _, pred = torch.max(outputs, 1)
+            lg_train_acc += torch.sum(pred == labels_t)
+            
+            # dql_optimizer.zero_grad()
+            # dql_batch = dql_memory.sample(_batch_size)
+            # dql_loss = CalculateQLoss(dql_batch, dql_net, dql_target_net, device)
+            # dql_loss.backward()
+            # dql_optimizer.step()
             
             if done:
+                if win:
+                    print("win -", end=" ")
+                else:
+                    print("lose -", end=" ")
+                print("accuracy: {} ".format((lg_train_acc.item()/_lg_batch_size)))
+                
+                lg_train_acc = 0.0
+                steps = 0
+                games += 1
                 lg_agent.Reset()
                 dql_agent.Reset()
         
 def CalculateLGLoss(batch, criterion, net, device='cpu'):
-    inputs, outputs, labels = batch
+    inputs, labels = batch
     
-        # TODO need to switch to the new full predicted list with a label to the 
-        # correct answer
-    inputs_t = torch.tensor(inputs).to(device)
-    outputs_t = torch.tensor([outputs], dtype=torch.float32).to(device)
-    labels_t = torch.tensor([labels], dtype=torch.int64).to(device)
+    inputs_t = torch.tensor(np.array(inputs, dtype=np.float32)).to(device)
+    outputs = net(inputs_t)
+    labels_t = torch.tensor(labels, dtype=torch.int64).to(device)
     
-    outs = net(inputs_t)
+    #need for grad to be applied...
+    # outs = net(inputs_t)
     
     # print(outs)
-    print(outputs_t, len(outputs_t))
-    print(labels_t, len(labels_t))
+    # print(outputs_t, len(outputs_t))
+    # print(labels_t, len(labels_t))
+    # exit()
     
-    return criterion(outputs_t, labels_t)
+    return criterion(outputs, labels_t), 
 
 def CalculateQLoss(batch, net, target_net, device='cpu'):
     states, actions, rewards, dones, next_states = batch

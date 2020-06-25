@@ -28,7 +28,7 @@ class BroomLG(nn.Module):
         # return self._fc(conv_out)
         return self._fc(X)
       
-Experience = collections.namedtuple('experience', field_names=['input', 'output', 'label'])  
+Experience = collections.namedtuple('experience', field_names=['input', 'label'])  
 class Agent:
     def __init__(self, env, memory):
         self._env = env
@@ -82,7 +82,6 @@ class Agent:
         
         # 0 means no mine - 1 means definitely mine
         lg_board = []
-        lg_state = []
         for i, row in enumerate(lg_map):
             lg_board.append([])
             for j, group in enumerate(row):
@@ -95,14 +94,13 @@ class Agent:
                 else:
                     # is mine, place probability
                     lg_board[i].append(tile_v[1])
-                lg_state[i].append(tile_v)
               
         lg_board = np.array(lg_board, dtype=np.float32, copy=False)
         lg_board = np.expand_dims(lg_board, axis=0)
         
         # print(lg_board)
         # print(c)
-        return lg_map, lg_board, lg_predictions
+        return lg_map, lg_board
         
     # lg map is also just the current env state
     def AddMemory(self, lg_map, lg_state, action, env_next_state):
@@ -127,17 +125,26 @@ class Agent:
             y_label = 1
         
         x_input = np.array(lg_map[row][column], dtype=np.float32)
+        # print(x_input); exit();
         
-        # #################################
-        # TODO add predictions into the experience inplace of the y_out
-        #-------------------------------------#
-        y_out = lg_state[0][row][column]
+        # TODO I need to keep the tensor as a tensor and not a list because
+        # it will lost its grad function.
+        # y_out = lg_predictions[row][column]
         
+        
+        # print(lg_predictions[row][column]); 
+        # print(y_out)
         # print("input", x_input)  
         # print("prediction", y_out, "label", y_label)
         
-        self._memory.append(Experience(x_input, y_out, y_label))
-            
+        self._memory.append(Experience(x_input, y_label))
+
+    def PlayStep(self, board):
+        action = self._env.action_space.sample()
+        next_state, _, done, win = self._env.step(action)
+        
+        return next_state, action, done, win
+    
 class Memory:
     def __init__(self, capacity):
         self._buffer = collections.deque(maxlen=capacity)
@@ -156,11 +163,12 @@ class Memory:
         labels = []
         for i in indices:
             inputs.append(self._buffer[i].input)
-            outputs.append(self._buffer[i].output)
+            # outputs.append(self._buffer[i].output)
             labels.append(self._buffer[i].label)
                 
         # print(inputs)
         # print(labels)
         # print(outputs)
+        return np.array(inputs), np.array(labels)
         return np.array(inputs), np.array(outputs), np.array(labels)
     
