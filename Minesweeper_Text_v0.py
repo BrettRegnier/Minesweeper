@@ -25,7 +25,8 @@ class Minesweeper_Text_v0(gym.Env):
         self._board = None
         self._unrevealed_remaining = UNREVEALED_TILE
 
-        self._first_action = True
+        self._done = False
+        self._win = False
         self._steps = 0
         self._MAX_STEPS = (self._rows * self._columns) - self._mines
 
@@ -34,23 +35,23 @@ class Minesweeper_Text_v0(gym.Env):
             low=0, high=10, shape=(1, self._rows, self._columns), dtype=np.float32)
         # self.observation_space = spaces.Box(low=0, high=10, shape=(
         #     1, self._rows * self._columns), dtype=np.int32)
+        self._seed = 0
 
     def step(self, action):
         tile = self._board[action]
-        done = False
+        self._done = False
+        self._win = False
         state = None
-        win = False
         reward = -0.3
 
         # check if mine or out of steps
         if tile[IS_MINE] == True or self._steps >= self._MAX_STEPS:
-            done = True
-            reward = -1
+            self._done = True
+            reward = -2
             tile[STATE] = MINE_TILE
-            print("lose", end=" ")
 
         # check if unrevealed
-        if tile[STATE] == UNREVEALED_TILE and not done:
+        if tile[STATE] == UNREVEALED_TILE and not self._done:
             reward = 0.7
 
             # reveal all neighbouring tiles that can be
@@ -70,25 +71,24 @@ class Minesweeper_Text_v0(gym.Env):
 
         # check win condition
         if self._unrevealed_remaining == 0:
-            done = True
-            win = True
+            self._done = True
+            self._win = True
             reward = 1
-            print("--win--", end=" ")
-
-        if self._first_action and done:
+            
+        if self._steps == 0 and self._done:
             reward = 0
-        self._first_action = False
 
         self._steps += 1
 
         state = self.State()
 
         # print(state, reward, done, win)
-        return state, reward, done, win
+        return state, reward, self._done, self._win
 
-    def reset(self, soft=False):
+    def reset(self, soft=False, load=False):
         self._unrevealed_remaining = (self._rows * self._columns) - self._mines
-        self._first_action = True
+        self._done = False
+        self._win = False
         self._steps = 0
 
         if soft and self._board is not None:
@@ -99,6 +99,9 @@ class Minesweeper_Text_v0(gym.Env):
 
             mine_indices = []
             to_make_mine = self._mines
+            if load == False: # for when I want to load in a seed
+                self._seed = random.rand()
+            random.seed(self._seed)
             choices = [c for c in range(self._rows * self._columns)]
             while to_make_mine > 0:
                 idx = random.choice(choices)
