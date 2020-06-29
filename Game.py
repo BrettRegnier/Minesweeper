@@ -6,6 +6,7 @@ import torch.optim as optim
 import numpy as np
 
 import os
+from time import time
 
 _gamma = .99
 _batch_size = 100
@@ -18,11 +19,13 @@ _epsilon_decay = 0.999
 _reset_threshold = 50
 _solved_win_count = 25
 
-_mode = 1
+_mode = 2
 _difficulty = 1.0
 
 # how many steps to play before copying
 _sync_target = 150
+
+
 
 def main():
     if _mode == 0:
@@ -42,7 +45,7 @@ def main():
             env.observation_space.shape, env.action_space.n).to(device)
         target_net = Broom(
             env.observation_space.shape, env.action_space.n).to(device)
-
+        
         if os.path.isfile("./minesweeper-best.dat"):
             net.load_state_dict(torch.load("./minesweeper-best.dat"))
             target_net.load_state_dict(torch.load("./minesweeper-best.dat"))
@@ -91,7 +94,7 @@ def main():
                 print("- games: %d, steps: %d, reward: %.3f, eps: %.2f, wins: %d, loses: %d, solved games: %d" %
                       (games, steps, mean_reward, epsilon, wins, loses, solved_games))
 
-                if best_mean_reward is None or best_mean_reward < mean_reward:
+                if best_mean_reward < mean_reward:
                     # torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
                     print("Best reward updated %.3f -> %.3f" %
                           (best_mean_reward, mean_reward))
@@ -118,6 +121,16 @@ def main():
                 print("solved!")
                 torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
                 exit()
+    
+    elif _mode == 2:
+        from Broom import RandomTuner
+        
+        env = Minesweeper_Text_v0(_difficulty)
+        device = torch.device("cuda")
+    
+        tuner = RandomTuner(env)
+        
+        tuner.RunTuning(device)
     
 def CalculateLoss(batch, net, target_net, device='cpu'):
     states, actions, rewards, dones, next_states = batch

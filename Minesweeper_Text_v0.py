@@ -100,7 +100,7 @@ class Minesweeper_Text_v0(gym.Env):
             mine_indices = []
             to_make_mine = self._mines
             if load == False: # for when I want to load in a seed
-                self._seed = random.rand()
+                self._seed = random.random()
             random.seed(self._seed)
             choices = [c for c in range(self._rows * self._columns)]
             while to_make_mine > 0:
