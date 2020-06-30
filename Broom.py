@@ -153,6 +153,7 @@ class Replay:
 
 from time import time
 import torch.optim as optim
+import os
 class RandomTuner:
     def __init__(self, env):
         self._storage = {}
@@ -185,7 +186,7 @@ class RandomTuner:
         filters = random.randint(70, 160)
         kernel_size = random.randint(3, 4)
         stride = random.randint(1, 2)
-        padding = random.randint(0, 1)
+        padding = random.randint(1, 2)
 
         conv = nn.Sequential(
             nn.Conv2d(in_channels=self._hyper['input_shape'][0], out_channels=filters, kernel_size=kernel_size, stride=stride, padding=padding),
@@ -342,6 +343,9 @@ class RandomTuner:
     def Save(self, net, reward):
         if self._storage == 0:
             self.Store(net, reward)
+            
+        if not os.path.exists("./models/broom/%.1f/" % reward):
+            os.makedirs("./models/broom/%.1f/" % reward)
             
         save_dir = "./models/broom/%.1f/" % reward
         with open(save_dir + "parameters.txt", "w") as file:

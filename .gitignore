@@ -108,3 +108,5 @@ dataset/gameset
 .vscode/*
 
 __pycache__/*
+
+Models
