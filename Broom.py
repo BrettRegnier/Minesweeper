@@ -339,10 +339,10 @@ class RandomTuner:
         if self._storage == 0:
             self.Store(net, reward)
             
-        if not os.path.exists("./models/broom/%.1f/" % reward):
-            os.makedirs("./models/broom/%.1f/" % reward)
+        save_dir = "./models/broom/%.3f/" % reward
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
             
-        save_dir = "./models/broom/%.1f/" % reward
         with open(save_dir + "parameters.txt", "w") as file:
             for key in self._storage:
                 file.write(str(key) + ":" + str(self._storage[key]) + "\n")
