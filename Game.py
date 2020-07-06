@@ -9,7 +9,7 @@ import os
 from time import time
 
 _gamma = .99
-_batch_size = 100
+_batch_size = 16
 _memory_size = 1000
 _learning_rate = 1e-4
 _epsilon_start = 1.0

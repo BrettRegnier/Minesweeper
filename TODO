@@ -1,33 +1,5 @@
-Add a global definition of training tests so I don't need to manipulate many spots in code for training
-    -Including stopping the game from ending when a mine is hit
-
-Add screenshotting to be captured but not saved, as to be passed into the CNN model
-Add a streamlined CNN model and use without having to reload it everytime.
-
-Make the folders automatically generate themselves
-
-Have the board deal with revealing other tiles based on idx
-
-Note:
-    Made this change to my core.py of keras-rl
-    https://github.com/keras-rl/keras-rl/issues/161
-
-Neural network to first decide which tiles MAY have a mine, via using convolutional NN on each tile... 
-Train on a single tile and its neighbours?
-
-for minefinder ai, needs all actions as tiles and then we need to determine the probability
-that is a mine, and therefore choose the lowest probability option
-
-Or rather during training we want it to find the mine.
-
-
-
-
-
-
 -- Do this next:
-    -Change the memories to be recorded based on the games not the steps
-    -Learn on a certain amount of games and their steps instead of steps alone
+    Actor-Critic network
 
     -Saving of boards.
     -Saving of replays.
@@ -39,3 +11,13 @@ Or rather during training we want it to find the mine.
         
     -- Another idea - Use a binary classifier to build a map of what is and isnt a mine that is trained on clicks
         and then use the output as a the input to a q network and make a decision on what to click.
+
+-- Hard Maybes
+    - Add a global definition of training tests so I don't need to manipulate many spots in code for training
+        -Including stopping the game from ending when a mine is hit
+
+    - Add screenshotting to be captured but not saved, as to be passed into the CNN model
+    - Add a streamlined CNN model and use without having to reload it everytime.
+
+    - Neural network to first decide which tiles MAY have a mine, via using convolutional NN on each tile... 
+    - Train on a single tile and its neighbours?

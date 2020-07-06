@@ -110,3 +110,5 @@ dataset/gameset
 __pycache__/*
 
 Models
+
+replays

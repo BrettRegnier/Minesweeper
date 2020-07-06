@@ -165,7 +165,7 @@ class RandomTuner:
         self._hyper["input_shape"] = env.observation_space.shape
         self._hyper["n_actions"] = env.action_space.n
         self._hyper["gamma"] = .99
-        self._hyper["batch_size"] = 100
+        self._hyper["batch_size"] = 16
         self._hyper["memory_size"] = 1000
         self._hyper["learning_rate"] = 1e-4
         self._hyper["epsilon_start"] = 1.0
@@ -175,7 +175,6 @@ class RandomTuner:
         self._hyper["solved_win_count"] = 25
         self._hyper["sync_target"] = 100
         
-        self._train_time = 60  # measured in minutes
         self._env = env
         
         self._num_tuning = 10
