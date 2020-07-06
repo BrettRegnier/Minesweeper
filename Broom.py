@@ -245,9 +245,7 @@ class RandomTuner:
             consecutive_wins = 0
             
             # training loop
-            start_time = time()
-            current_time = start_time
-            while current_time < start_time + 1200:
+            while games < 3500:
                 reward, win = agent.PlayStep(net, steps, epsilon, device)
                 steps += 1
                 total_steps += 1
@@ -294,9 +292,6 @@ class RandomTuner:
                     loss = self.CalculateLoss(batch, net, target_net, device)
                     loss.backward()
                     optimizer.step()
-                
-                # end of while
-                current_time = time()
             
             self._hyper['wins'] = wins
             self._hyper['loses'] = loses
