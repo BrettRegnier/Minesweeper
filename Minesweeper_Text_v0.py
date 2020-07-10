@@ -83,7 +83,7 @@ class Minesweeper_Text_v0(gym.Env):
         state = self.State()
 
         # print(state, reward, done, win)
-        return state, reward, self._done, self._win
+        return state, reward, self._done, {"win":self._win}
 
     def reset(self, soft=False, load=False):
         self._unrevealed_remaining = (self._rows * self._columns) - self._mines
@@ -165,7 +165,6 @@ class Minesweeper_Text_v0(gym.Env):
         state_np = np.reshape(state_np, (-1, self._columns))
         state_np = np.expand_dims(state_np, axis=0)
 
-        # print(state_np)
         return state_np
 
     def GetAction(self, row, column):

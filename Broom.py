@@ -245,7 +245,8 @@ class RandomTuner:
             
             # training loop
             while games < 3500:
-                reward, win = agent.PlayStep(net, steps, epsilon, device)
+                reward, misc = agent.PlayStep(net, steps, epsilon, device)
+                win = misc['win']
                 steps += 1
                 total_steps += 1
                 

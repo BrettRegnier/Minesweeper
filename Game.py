@@ -19,7 +19,7 @@ _epsilon_decay = 0.999
 _reset_threshold = 50
 _solved_win_count = 25
 
-_mode = 2
+_mode = 3
 _difficulty = 1.0
 
 # how many steps to play before copying
@@ -70,7 +70,8 @@ def main():
 
         # training loop
         while True:
-            reward, win = agent.PlayStep(net, steps, epsilon, device)
+            reward, misc = agent.PlayStep(net, steps, epsilon, device)
+            win = misc['win']
             steps += 1
             total_steps += 1
             if reward is not None:
@@ -131,6 +132,75 @@ def main():
         tuner = RandomTuner(env)
         
         tuner.RunTuning(device)
+
+    elif _mode == 3:
+        from BroomA2C import BroomA2C
+        from BroomA2C import AgentA2C
+
+        device = torch.device("cuda")
+        env = Minesweeper_Text_v0(_difficulty)
+
+        actor = BroomA2C(env.observation_space.shape, env.action_space.n, lr=0.00001)
+        critic = BroomA2C(env.observation_space.shape, 1, lr=0.0005)
+
+        actor.to(device)
+        critic.to(device)
+
+        agent = AgentA2C(actor, critic)
+
+        score_history = []
+        n_epsiodes = 3500
+
+        wins = 0
+        loses = 0
+
+        gamma = 0.99
+
+        games = 0
+        while True:
+            done = False
+            win = False
+            score = 0
+            steps = 0
+            state = env.reset()
+            while not done:
+                steps += 1
+
+                state_np = np.reshape(state, (-1))
+                state_t = torch.FloatTensor(state_np).to(device)
+
+                action = agent.Act(state_t)
+                next_state, reward, done, misc = env.step(action)
+
+                next_state_np = np.reshape(next_state, (-1))
+                next_state_t = torch.FloatTensor(next_state_np).to(device)
+                
+                reward_t = torch.tensor(np.array(reward)).to(device)
+                # action_t = torch.tensor(np.array(action)).to(device)
+                done_t = torch.tensor(done).to(device)
+
+
+                win = misc['win']
+                score += reward
+
+
+                agent.Learn(state_t, reward_t, next_state_t, done_t, gamma)
+
+                state = next_state
+
+            games += 1
+
+
+            if win:
+                print("{:<7}".format("win - "), end="")
+                wins += 1
+            else:            
+                print("{:<7}".format("lose - "), end="")
+                loses += 1
+
+            print("episode: %d, steps: %d, score: %.3f, wins: %d, loses: %d" % (games, steps, score, wins, loses))
+            score_history.append(score)
+
     
 def CalculateLoss(batch, net, target_net, device='cpu'):
     states, actions, rewards, dones, next_states = batch
