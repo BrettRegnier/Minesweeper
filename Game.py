@@ -9,7 +9,7 @@ import os
 from time import time
 
 _gamma = .99
-_batch_size = 16
+_batch_size = 100
 _memory_size = 1000
 _learning_rate = 1e-4
 _epsilon_start = 1.0
@@ -19,8 +19,8 @@ _epsilon_decay = 0.999
 _reset_threshold = 50
 _solved_win_count = 25
 
-_mode = 3
-_difficulty = 1.0
+_mode = 1
+_difficulty = 1
 
 # how many steps to play before copying
 _sync_target = 150
@@ -134,19 +134,17 @@ def main():
         tuner.RunTuning(device)
 
     elif _mode == 3:
-        from BroomA2C import BroomA2C
+        from BroomA2C import BroomConvoA2C
         from BroomA2C import AgentA2C
 
         device = torch.device("cuda")
         env = Minesweeper_Text_v0(_difficulty)
+        learning_rate = 0.0001
+        actor_critic = BroomConvoA2C(env.observation_space.shape, env.action_space.n, lr=learning_rate)
 
-        actor = BroomA2C(env.observation_space.shape, env.action_space.n, lr=0.00001)
-        critic = BroomA2C(env.observation_space.shape, 1, lr=0.0005)
+        actor_critic.to(device)
 
-        actor.to(device)
-        critic.to(device)
-
-        agent = AgentA2C(actor, critic)
+        agent = AgentA2C(actor_critic)
 
         score_history = []
         n_epsiodes = 3500
@@ -157,25 +155,27 @@ def main():
         gamma = 0.99
 
         games = 0
+
+        compress_v = np.vectorize(lambda a : (a+2)/11)
+
         while True:
             done = False
             win = False
             score = 0
             steps = 0
-            state = env.reset()
+            state = env.reset(soft=True)
+            state_n = compress_v(state)
+            state_t = torch.tensor([state_n], dtype=torch.float).to(device)
             while not done:
                 steps += 1
 
-                state_np = np.reshape(state, (-1))
-                state_t = torch.FloatTensor(state_np).to(device)
 
                 action = agent.Act(state_t)
                 next_state, reward, done, misc = env.step(action)
-
-                next_state_np = np.reshape(next_state, (-1))
-                next_state_t = torch.FloatTensor(next_state_np).to(device)
+                next_state_n = compress_v(next_state)
+                next_state_t = torch.tensor([next_state_n], dtype=torch.float).to(device)
                 
-                reward_t = torch.tensor(np.array(reward)).to(device)
+                reward_t = torch.tensor(np.array(reward), dtype=torch.float).to(device)
                 # action_t = torch.tensor(np.array(action)).to(device)
                 done_t = torch.tensor(done).to(device)
 
@@ -186,7 +186,7 @@ def main():
 
                 agent.Learn(state_t, reward_t, next_state_t, done_t, gamma)
 
-                state = next_state
+                state_t = next_state_t
 
             games += 1
 
@@ -205,8 +205,8 @@ def main():
 def CalculateLoss(batch, net, target_net, device='cpu'):
     states, actions, rewards, dones, next_states = batch
 
-    states_d = torch.tensor(np.array(states, copy=False)).to(device)
-    next_states_d = torch.tensor(
+    states_d = torch.FloatTensor(np.array(states, copy=False)).to(device)
+    next_states_d = torch.FloatTensor(
         np.array(next_states, copy=False)).to(device)
     actions_d = torch.LongTensor(np.array(actions)).to(device)
     rewards_d = torch.FloatTensor(np.array(rewards)).to(device)

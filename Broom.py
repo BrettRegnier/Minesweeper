@@ -8,28 +8,17 @@ import collections
 
 class Broom(nn.Module):
     def __init__(self, input_shape, n_actions):
-        super(Broom, self).__init__()
+        super(Broom, self).__init__()        
         conv = nn.Sequential(
-            # nn.Conv2d(in_channels=input_shape[0], out_channels=240, kernel_size=3, stride=1, padding=1),
-            # nn.ReLU(),
-            # nn.Conv2d(in_channels=240, out_channels=160, kernel_size=3, stride=1),
-            # nn.ReLU(),
-
-            # nn.MaxPool2d(kernel_size=3),
-
-            # nn.Conv2d(in_channels=160, out_channels=80, kernel_size=2),
-            # nn.ReLU()
-
             nn.Conv2d(input_shape[0], 80, kernel_size=4, stride=1, padding=2),
             nn.ReLU(),
-            nn.Conv2d(80, 80, kernel_size=3, stride=1),
+            nn.Conv2d(80, 80, kernel_size=3, stride=1, padding=1),
             nn.ReLU()
         )
 
         out = conv(torch.zeros(1, *input_shape))
         conv_out_shape = int(np.prod(out.size()))
-        # print(conv_out_shape)
-        # print(conv_out_shape); exit()
+
         fc = nn.Sequential(
             nn.Linear(conv_out_shape, 512),
             nn.Linear(512, 512),
@@ -50,7 +39,6 @@ class Broom(nn.Module):
 Experience = collections.namedtuple('experience', field_names=[
                                     'state', 'action', 'reward', 'done', 'next_state'])
 
-
 class Agent:
     def __init__(self, env, memory):
         self._env = env
@@ -59,7 +47,9 @@ class Agent:
         self.Reset()
 
     def Reset(self, soft=False):
-        self._state = self._env.reset(soft=soft)
+        state = self._env.reset(soft=soft)
+        self._compress = np.vectorize(lambda x: (x+2)/11)
+        self._state = self._compress(state)
         self._total_reward = 0
 
     @torch.no_grad()
@@ -79,6 +69,8 @@ class Agent:
 
         # step
         next_state, reward, done, win = self._env.step(action)
+
+        next_state = self._compress(next_state)
 
         experience = Experience(self._state, action, reward, done, next_state)
         if not (steps == 0 and done):

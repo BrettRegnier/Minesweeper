@@ -5,8 +5,8 @@ import random
 
 import collections
 
-UNREVEALED_TILE = 9
-MINE_TILE = 10
+UNREVEALED_TILE = -1
+MINE_TILE = 9
 
 STATE = 0
 NEIGHBOURS = 1
@@ -19,8 +19,8 @@ class Minesweeper_Text_v0(gym.Env):
         super(Minesweeper_Text_v0, self).__init__()
         self._rows = int(6 * difficulty + 2)
         self._columns = int(11 * difficulty - difficulty**2)
-        self._mines = int(((0.006895 * difficulty**2) + 0.013045 *
-                           difficulty + 0.10506) * (self._rows * self._columns))
+        self._mines = max(int(((0.006895 * difficulty**2) + 0.013045 *
+                           difficulty + 0.10506) * (self._rows * self._columns)), 4)
 
         self._board = None
         self._unrevealed_remaining = UNREVEALED_TILE
@@ -32,7 +32,7 @@ class Minesweeper_Text_v0(gym.Env):
 
         self.action_space = spaces.Discrete(self._rows * self._columns)
         self.observation_space = spaces.Box(
-            low=0, high=10, shape=(1, self._rows, self._columns), dtype=np.float32)
+            low=-1, high=9, shape=(1, self._rows, self._columns), dtype=np.float32)
         # self.observation_space = spaces.Box(low=0, high=10, shape=(
         #     1, self._rows * self._columns), dtype=np.int32)
         self._seed = 0
@@ -133,8 +133,7 @@ class Minesweeper_Text_v0(gym.Env):
 
                     # tiles
                     is_mine = (row * self._columns + column) in mine_indices
-                    state = 9  # unrevealed
-                    # tile = Tile(neighbours, neighbouring_mines, is_mine)
+                    state = UNREVEALED_TILE  # unrevealed
                     self._board.append(
                         [state, neighbours, neighbouring_mines, is_mine])
 
@@ -145,10 +144,7 @@ class Minesweeper_Text_v0(gym.Env):
         for row in range(self._rows):
             for column in range(self._columns):
                 tile = self._board[row * self._columns + column]
-                if tile[STATE] < 10:
-                    print(tile[STATE], "", end=" ")
-                else:
-                    print(tile[STATE], end=" ")
+                print("{:>2}".format(tile[STATE]), end=" ")
             print("")
 
         print("")
@@ -158,7 +154,6 @@ class Minesweeper_Text_v0(gym.Env):
         neighbours = []
         for t in self._board:
             states.append(t[STATE])
-            # neighbours.append(t[NEIGHBOURS])
         state_np = np.array(states, dtype=np.float32)
         
         # convolution
@@ -177,7 +172,8 @@ class Minesweeper_Text_v0(gym.Env):
         while True:
             i, j = input("choose tile [row column] - rows: " + str(self._rows-1) + " columns: " + str(self._columns-1) + "\n>").split()
             action = self.GetAction(int(i), int(j))
-            state, reward, done, win = self.step(action)
+            state, reward, done, info = self.step(action)
+            win = info['win']
             print(reward, done, win)
             self.render()
 
@@ -192,4 +188,5 @@ class Minesweeper_Text_v0(gym.Env):
                 self.render()
 
 
-    
+# env = Minesweeper_Text_v0(0.5)
+# env.Play()
