@@ -1,5 +1,3 @@
-from Minesweeper_Text_v0 import Minesweeper_Text_v0
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,23 +5,12 @@ import numpy as np
 
 import os
 from time import time
-
-_gamma = .99
-_batch_size = 100
-_memory_size = 1000
-_learning_rate = 1e-4
-_epsilon_start = 1.0
-_epsilon_final = 0.01
-_epsilon_decay = 0.999
-
-_reset_threshold = 50
-_solved_win_count = 25
+import math
 
 _mode = 1
 _difficulty = 1
 
 # how many steps to play before copying
-_sync_target = 150
 
 
 
@@ -34,106 +21,116 @@ def main():
         env = Minesweeper_v1(human=_human, difficulty=_difficulty)
         env.Play()
     elif _mode == 1:
-        # q learning
-        from Broom import Broom
-        from Broom import Memory
-        from Broom import Agent
+        from Minesweeper_Text_v0 import Minesweeper_Text_v0
+        from BroomDQL import Agent
+        from Memory import Experience
+        from Memory import Memory
+        from Replay import Replay
+
+        # hyperparameters
+        memory_size = 1000
+        learning_rate = 1e-4
+        gamma = .99
         
-        env = Minesweeper_Text_v0(_difficulty)
+        epsilon_start = 1.0
+        epsilon_final = 0.01
+        epsilon_decay = 0.999
+
+        batch_size = 100
+        sync_target = 150
+
+        reset_threshold = 50 # maybe remove
+        solved_win_count = 25 # maybe remove
+
+
         device = torch.device("cuda")
-        net = Broom(
-            env.observation_space.shape, env.action_space.n).to(device)
-        target_net = Broom(
-            env.observation_space.shape, env.action_space.n).to(device)
-        
-        if os.path.isfile("./minesweeper-best.dat"):
-            net.load_state_dict(torch.load("./minesweeper-best.dat"))
-            target_net.load_state_dict(torch.load("./minesweeper-best.dat"))
-            print("loaded")
+        env = Minesweeper_Text_v0(_difficulty)
+        replay = Replay()
+        memory = Memory(memory_size)
 
-        memory = Memory(_memory_size)
-        agent = Agent(env, memory)
-        epsilon = _epsilon_start
+        # declare agent
+        input_shape = env.observation_space.shape
+        n_actions = env.action_space.n
+        agent = Agent(input_shape, n_actions, sync_target, learning_rate, device)
+        epsilon = epsilon_start
 
-        optimizer = optim.Adam(net.parameters(), lr=_learning_rate)
         total_rewards = []
-        best_mean_reward = -9999
-        steps = 0
+        best_mean_reward = -math.inf
+
         total_steps = 0
-        games = 0
-        solved_games = 0
         
+        games = 0
         wins = 0
         loses = 0
-
         consecutive_wins = 0
+        solved_games = 0
 
-        # training loop
         while True:
-            reward, misc = agent.PlayStep(net, steps, epsilon, device)
-            win = misc['win']
-            steps += 1
-            total_steps += 1
-            if reward is not None:
-                if win:
-                    consecutive_wins += 1
-                    wins += 1
-                    print('Win ', end="")
+            done = False
+            win = False
+            steps = 0
+            accumulated_reward = 0
+
+            state = env.reset(True)
+            while not done:
+                # take an action
+                if np.random.random() < epsilon:
+                    action = env.action_space.sample()
                 else:
-                    consecutive_wins = 0
-                    loses += 1
-                    print("Lose ", end="")
-                games += 1
-                
-                # reset the game
-                if games > _reset_threshold:
-                    agent.Reset(soft=False)
+                    action = agent.Act(state, device)
+
+                # perform the step
+                next_state, reward, done, info = env.step(action)
+
+                # record the memory if the agent didn't win/lose on first action
+                # this allows it to converge slightly faster.
+                exp = Experience(state, action, reward, done, next_state)
+                if not (steps == 0 and done):
+                    memory.append(exp)
                     
-                total_rewards.append(reward)
-                # get mean of last 100 rewards
-                mean_reward = np.mean(total_rewards[-100:])
-                print("- games: %d, steps: %d, reward: %.3f, eps: %.2f, wins: %d, loses: %d, solved games: %d" %
-                      (games, steps, mean_reward, epsilon, wins, loses, solved_games))
+                state = next_state
 
-                if best_mean_reward < mean_reward:
-                    # torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
-                    print("Best reward updated %.3f -> %.3f" %
-                          (best_mean_reward, mean_reward))
-                    best_mean_reward = mean_reward
+                accumulated_reward += reward
 
+                steps += 1
+                total_steps += 1
 
-                steps = 0
-                epsilon = max(_epsilon_final, epsilon * _epsilon_decay)
+                if len(memory) < batch_size:
+                    continue
+
+                batch = memory.sample(batch_size)
+                agent.LearnBatch(batch, gamma, device)
+
+            # after done
+            games += 1
+            win = info['win']
+            if win:
+                consecutive_wins += 1
+                wins += 1
+            else:
+                consecutive_wins = 0
+                loses += 1
+
+            total_rewards.append(accumulated_reward)
+            total_rewards = total_rewards[-100:]
+            mean_reward = np.mean(total_rewards)
+
+            epsilon = max(epsilon_final, epsilon * epsilon_decay)
+
+            if win:
+                print("{:<5}".format("win"), end="")
+            else:
+                print("{:<5}".format("lose"), end="")
             
-            if len(memory) < _batch_size:
-                continue
+            print(" - games: %d, steps: %d, reward: %.3f, eps: %.2f, wins: %d, loses: %d, solved games: %d" %
+                      (games, steps, mean_reward, epsilon, wins, loses, solved_games), end=" ")
+            if best_mean_reward < mean_reward:
+                print("Best reward updated %.3f -> %.3f" %
+                    (best_mean_reward, mean_reward), end="")
+                best_mean_reward = mean_reward
+            print("")
 
-            if total_steps % _sync_target == 0:
-                target_net.load_state_dict(net.state_dict())
-                # print("load target")
-
-            optimizer.zero_grad()
-            batch = memory.sample(_batch_size)
-            loss = CalculateLoss(batch, net, target_net, device)
-            loss.backward()
-            optimizer.step()
-
-            if consecutive_wins == _solved_win_count:
-                print("solved!")
-                torch.save(net.state_dict(), "minesweeper-best_%.0f.dat" % mean_reward)
-                exit()
-    
-    elif _mode == 2:
-        from Broom import RandomTuner
-        
-        env = Minesweeper_Text_v0(_difficulty)
-        device = torch.device("cuda")
-    
-        tuner = RandomTuner(env)
-        
-        tuner.RunTuning(device)
-
-    elif _mode == 3:
+    if _mode == 3:
         from BroomA2C import BroomConvoA2C
         from BroomA2C import AgentA2C
 
@@ -164,6 +161,7 @@ def main():
             score = 0
             steps = 0
             state = env.reset(soft=True)
+            SplitState(state)
             state_n = compress_v(state)
             state_t = torch.tensor([state_n], dtype=torch.float).to(device)
             while not done:
@@ -201,27 +199,26 @@ def main():
             print("episode: %d, steps: %d, score: %.3f, wins: %d, loses: %d" % (games, steps, score, wins, loses))
             score_history.append(score)
 
-    
-def CalculateLoss(batch, net, target_net, device='cpu'):
-    states, actions, rewards, dones, next_states = batch
+# TODO deprecate?
+def SplitState(state):
+    state = np.pad(state[0], 1)
+    new_state = []
 
-    states_d = torch.FloatTensor(np.array(states, copy=False)).to(device)
-    next_states_d = torch.FloatTensor(
-        np.array(next_states, copy=False)).to(device)
-    actions_d = torch.LongTensor(np.array(actions)).to(device)
-    rewards_d = torch.FloatTensor(np.array(rewards)).to(device)
-    dones_d = torch.BoolTensor(dones).to(device)
+    for i in range(1, len(state) - 1):
+        for j in range(1, len(state[i]) - 1):
+            tiles = []
+            for k in range(i-1, i + 2):
+                row = []
+                for l in range(j-1, j + 2):
+                    tile = state[k][l]
+                    row.append(tile)
+                tiles.append(row)
 
-    state_action_values = net(states_d).gather(
-        1, actions_d.unsqueeze(-1)).squeeze(-1)
-    with torch.no_grad():
-        next_state_values = target_net(next_states_d).max(1)[0]
-        next_state_values[dones_d] = 0.0
-        next_state_values = next_state_values.detach()
+            new_state.append(tiles)
 
-    expected_state_action_values = next_state_values * _gamma + rewards_d
+    new_state = np.array(new_state)
 
-    return nn.MSELoss()(state_action_values, expected_state_action_values)
+    return new_state
 
 def PrintStatus():
     pass

@@ -23,7 +23,7 @@ class Minesweeper_Text_v0(gym.Env):
                            difficulty + 0.10506) * (self._rows * self._columns)), 4)
 
         self._board = None
-        self._unrevealed_remaining = UNREVEALED_TILE
+        self._unrevealed_remaining = (self._rows * self._columns) - self._mines
 
         self._done = False
         self._win = False
@@ -45,9 +45,9 @@ class Minesweeper_Text_v0(gym.Env):
         reward = -0.3
 
         # check if mine or out of steps
-        if tile[IS_MINE] == True or self._steps >= self._MAX_STEPS:
+        if tile[IS_MINE] == True:
             self._done = True
-            reward = -2
+            reward = -1
             tile[STATE] = MINE_TILE
 
         # check if unrevealed
@@ -83,7 +83,7 @@ class Minesweeper_Text_v0(gym.Env):
         state = self.State()
 
         # print(state, reward, done, win)
-        return state, reward, self._done, {"win":self._win}
+        return state, reward, self._done, {'win':self._win}
 
     def reset(self, soft=False, load=False):
         self._unrevealed_remaining = (self._rows * self._columns) - self._mines

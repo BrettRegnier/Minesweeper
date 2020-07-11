@@ -11,16 +11,15 @@ class BroomConvoA2C(nn.Module):
         super(BroomConvoA2C, self).__init__()
 
         self._conv = nn.Sequential(
-            nn.Conv2d(input_shape[0], 256, kernel_size=(3,3), stride=(1,1), padding=(1,1)),
+            nn.Conv2d(input_shape[0], 9, kernel_size=(3,3), stride=(1,1), padding=0),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=3, stride=3, padding=0, dilation=1, ceil_mode=False)
         )
 
         out = self._conv(torch.zeros(1, *input_shape))
         conv_out_shape = int(np.prod(out.size()))
 
         self._fc1 = nn.Linear(in_features=conv_out_shape, out_features=1024)
-        self._fc2 = nn.Linear(in_features=1024, out_features=512)
+        self._fc2 = nn.Linear(in_features=1024, out_features=2)
         self._policy = nn.Linear(in_features= 512, out_features=n_actions)
         self._value = nn.Linear(in_features=512, out_features=1)
 
