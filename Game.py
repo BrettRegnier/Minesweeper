@@ -71,7 +71,7 @@ def main():
             steps = 0
             accumulated_reward = 0
 
-            state = env.reset(True)
+            state = env.reset(False)
             while not done:
                 # take an action
                 if np.random.random() < epsilon:
@@ -129,6 +129,10 @@ def main():
                     (best_mean_reward, mean_reward), end="")
                 best_mean_reward = mean_reward
             print("")
+
+            if consecutive_wins == solved_win_count:
+                solved_games += 1
+                print("solved"); exit()
 
     if _mode == 3:
         from BroomA2C import BroomConvoA2C

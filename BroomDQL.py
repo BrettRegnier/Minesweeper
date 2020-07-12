@@ -89,8 +89,9 @@ class Agent:
 
     def LearnBatch(self, batch, gamma, device):
         # sync target
-        if self._steps % self._sync_target == 0:
-            self._dql_target_net.state_dict(self._dql_net.state_dict())        
+        if self._steps >= self._sync_target:
+            self._dql_target_net.state_dict(self._dql_net.state_dict())      
+            self._steps = 0  
 
         self._dql_net._optimizer.zero_grad()
 
@@ -109,7 +110,7 @@ class Agent:
             next_state_values[dones_t] = 0.0
             next_state_values = next_state_values.detach()
 
-        expected_state_action_values = next_state_values * gamma * rewards_t
+        expected_state_action_values = next_state_values * gamma + rewards_t
 
         loss = self._loss_func(state_action_values, expected_state_action_values)
         loss.backward()
