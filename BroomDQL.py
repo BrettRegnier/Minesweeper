@@ -22,11 +22,11 @@ class Network(nn.Module):
         conv_out_shape = int(np.prod(out.size()))
 
         self._fc = nn.Sequential(
-            nn.Linear(conv_out_shape, 512),
+            nn.Linear(conv_out_shape, 2048),
             nn.ReLU(),
-            nn.Linear(512, 512),
+            nn.Linear(2048, 2048),
             nn.ReLU(),
-            nn.Linear(512, n_actions)
+            nn.Linear(2048, n_actions)
         )
 
         self._optimizer = optim.Adam(self.parameters(), lr=lr)

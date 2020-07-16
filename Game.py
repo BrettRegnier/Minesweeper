@@ -34,7 +34,7 @@ def main():
         
         epsilon_start = 1.0
         epsilon_final = 0.01
-        epsilon_decay = 0.999
+        epsilon_decay = 0.99
 
         batch_size = 100
         sync_target = 150
@@ -71,7 +71,7 @@ def main():
             steps = 0
             accumulated_reward = 0
 
-            state = env.reset(False)
+            state = env.reset(True)
             while not done:
                 # take an action
                 if np.random.random() < epsilon:
@@ -118,9 +118,9 @@ def main():
             epsilon = max(epsilon_final, epsilon * epsilon_decay)
 
             if win:
-                print("{:<5}".format("win"), end="")
+                print("{:<4}".format("win"), end="")
             else:
-                print("{:<5}".format("lose"), end="")
+                print("{:<4}".format("lose"), end="")
             
             print(" - games: %d, steps: %d, reward: %.3f, eps: %.2f, wins: %d, loses: %d, solved games: %d" %
                       (games, steps, mean_reward, epsilon, wins, loses, solved_games), end=" ")
@@ -133,75 +133,77 @@ def main():
             if consecutive_wins == solved_win_count:
                 solved_games += 1
                 print("solved"); exit()
-
-    if _mode == 3:
+    if _mode == 2:
         from BroomA2C import BroomConvoA2C
         from BroomA2C import AgentA2C
+        from Minesweeper_Text_v0 import Minesweeper_Text_v0
+
+        learning_rate = 0.0001
+        gamma = 0.99
 
         device = torch.device("cuda")
         env = Minesweeper_Text_v0(_difficulty)
-        learning_rate = 0.0001
-        actor_critic = BroomConvoA2C(env.observation_space.shape, env.action_space.n, lr=learning_rate)
+        agent = AgentA2C(env.observation_space.shape, env.action_space.n, learning_rate, gamma, device)
 
-        actor_critic.to(device)
+        total_rewards = []
 
-        agent = AgentA2C(actor_critic)
-
-        score_history = []
         n_epsiodes = 3500
+        solved_win_count = 25
 
-        wins = 0
-        loses = 0
-
-        gamma = 0.99
+        total_steps = 0
 
         games = 0
+        wins = 0
+        loses = 0
+        consecutive_wins = 0
+        solved_games = 0
 
         compress_v = np.vectorize(lambda a : (a+2)/11)
 
         while True:
             done = False
             win = False
-            score = 0
             steps = 0
+            accumulated_reward = 0
+
             state = env.reset(soft=True)
-            SplitState(state)
-            state_n = compress_v(state)
-            state_t = torch.tensor([state_n], dtype=torch.float).to(device)
+            # SplitState(state)
+            # state_n = compress_v(state)
             while not done:
-                steps += 1
+                action = agent.Act(state)
+                next_state, reward, done, info = env.step(action)
 
+                accumulated_reward += reward
 
-                action = agent.Act(state_t)
-                next_state, reward, done, misc = env.step(action)
-                next_state_n = compress_v(next_state)
-                next_state_t = torch.tensor([next_state_n], dtype=torch.float).to(device)
+                agent.Learn(state, reward, next_state, done, gamma)
                 
-                reward_t = torch.tensor(np.array(reward), dtype=torch.float).to(device)
-                # action_t = torch.tensor(np.array(action)).to(device)
-                done_t = torch.tensor(done).to(device)
+                state = next_state
 
+                steps += 1
+                total_steps += 1
 
-                win = misc['win']
-                score += reward
-
-
-                agent.Learn(state_t, reward_t, next_state_t, done_t, gamma)
-
-                state_t = next_state_t
-
+            # after done
             games += 1
+            win = info['win']
 
+            total_rewards.append(accumulated_reward)
+            total_rewards = total_rewards[-100:]
+            mean_reward = np.mean(total_rewards)
 
             if win:
-                print("{:<7}".format("win - "), end="")
+                print("{:<4}".format("win"), end="")
+                consecutive_wins += 1
                 wins += 1
             else:            
-                print("{:<7}".format("lose - "), end="")
+                print("{:<4}".format("lose"), end="")
                 loses += 1
 
-            print("episode: %d, steps: %d, score: %.3f, wins: %d, loses: %d" % (games, steps, score, wins, loses))
-            score_history.append(score)
+            print(" - games: %d, steps: %d, reward: %.3f, wins: %d, loses: %d, solved games: %d" %
+                      (games, steps, mean_reward, wins, loses, solved_games))
+
+            if consecutive_wins == solved_win_count:
+                solved_games += 1
+                print("solved"); exit()
 
 # TODO deprecate?
 def SplitState(state):

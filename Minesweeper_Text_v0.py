@@ -102,6 +102,7 @@ class Minesweeper_Text_v0(gym.Env):
             if load == False: # for when I want to load in a seed
                 self._seed = random.random()
             random.seed(self._seed)
+            random.seed(0) # TODO REMOVE
             choices = [c for c in range(self._rows * self._columns)]
             while to_make_mine > 0:
                 idx = random.choice(choices)

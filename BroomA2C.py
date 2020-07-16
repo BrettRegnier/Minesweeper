@@ -11,17 +11,17 @@ class BroomConvoA2C(nn.Module):
         super(BroomConvoA2C, self).__init__()
 
         self._conv = nn.Sequential(
-            nn.Conv2d(input_shape[0], 9, kernel_size=(3,3), stride=(1,1), padding=0),
-            nn.ReLU(),
+            nn.Conv2d(input_shape[0], 80, kernel_size=(5,5), stride=(1,1), padding=2),
+            nn.ReLU()
         )
 
         out = self._conv(torch.zeros(1, *input_shape))
         conv_out_shape = int(np.prod(out.size()))
 
-        self._fc1 = nn.Linear(in_features=conv_out_shape, out_features=1024)
-        self._fc2 = nn.Linear(in_features=1024, out_features=2)
-        self._policy = nn.Linear(in_features= 512, out_features=n_actions)
-        self._value = nn.Linear(in_features=512, out_features=1)
+        self._fc1 = nn.Linear(in_features=conv_out_shape, out_features=2048)
+        self._fc2 = nn.Linear(in_features=2048, out_features=1024)
+        self._policy = nn.Linear(in_features= 1024, out_features=n_actions)
+        self._value = nn.Linear(in_features=1024, out_features=1)
 
         self._optimizer = optim.Adam(self.parameters(), lr=lr)
 
@@ -69,15 +69,25 @@ class BroomA2C(nn.Module):
         return policy, value
 
 class AgentA2C(object):
-    def __init__(self, actor_critic):
-        self._actor_critic = actor_critic
+    def __init__(self, input_shape, n_actions, lr, gamma, device):
+        self._device = device
+        self._gamma = gamma
+        self._actor_critic = BroomConvoA2C(input_shape, n_actions, lr).to(self._device)
 
     def Learn(self, state, reward, next_state, done, gamma=0.99):
+        state_t = torch.tensor([state], dtype=torch.float).to(self._device)
+        
+        next_state_t = torch.tensor([next_state], dtype=torch.float).to(self._device)
+        
+        reward_t = torch.tensor(np.array(reward), dtype=torch.float).to(self._device)
+        # action_t = torch.tensor(np.array(action)).to(self._device)
+        done_t = torch.tensor(done).to(self._device)
+
         self._actor_critic._optimizer.zero_grad()
         
-        state_value, next_state_value = self.Critique(state, next_state)
+        state_value, next_state_value = self.Critique(state_t, next_state_t)
 
-        delta = reward + gamma * next_state_value
+        delta = reward_t + gamma * next_state_value * (1 - int(done_t))
         temporal_difference = delta - state_value
 
         actor_loss = -self._log_probs * temporal_difference
@@ -88,12 +98,12 @@ class AgentA2C(object):
         self._actor_critic._optimizer.step()
     
     def Act(self, state):
-        probabilities, _ = self._actor_critic(state)  
+        state_t = torch.tensor([state], dtype=torch.float).to(self._device)
+        probabilities, _ = self._actor_critic(state_t)  
         probabilities = F.softmax(probabilities, dim=0)
         action_probs = torch.distributions.Categorical(probabilities)
         action = action_probs.sample()
         self._log_probs = action_probs.log_prob(action)
-
         return action.item()
 
     def Critique(self, state, next_state):
