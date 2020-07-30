@@ -11,8 +11,8 @@ class BroomConvoA2C(nn.Module):
         super(BroomConvoA2C, self).__init__()
 
         self._conv = nn.Sequential(
-            nn.Conv2d(input_shape[0], 80, kernel_size=(5,5), stride=(1,1), padding=2),
-            nn.ReLU()
+            nn.Conv2d(input_shape[0], 300, kernel_size=(input_shape[1], input_shape[2]), stride=1),
+            nn.ReLU(),
         )
 
         out = self._conv(torch.zeros(1, *input_shape))
@@ -20,6 +20,7 @@ class BroomConvoA2C(nn.Module):
 
         self._fc1 = nn.Linear(in_features=conv_out_shape, out_features=2048)
         self._fc2 = nn.Linear(in_features=2048, out_features=1024)
+        self._fc3 = nn.Linear(in_features=1024, out_features=1024)
         self._policy = nn.Linear(in_features= 1024, out_features=n_actions)
         self._value = nn.Linear(in_features=1024, out_features=1)
 
@@ -30,6 +31,7 @@ class BroomConvoA2C(nn.Module):
 
         out = F.relu(self._fc1(conv_out))
         out = F.relu(self._fc2(out))
+        out = F.relu(self._fc3(out))
 
         policy = self._policy(out)
         value = self._value(out)
@@ -71,10 +73,37 @@ class BroomA2C(nn.Module):
 class AgentA2C(object):
     def __init__(self, input_shape, n_actions, lr, gamma, device):
         self._device = device
-        self._gamma = gamma
         self._actor_critic = BroomConvoA2C(input_shape, n_actions, lr).to(self._device)
 
+    def LearnBatch(self, batch, gamma=0.99):
+        self._actor_critic._optimizer.zero_grad()
+
+        # calculate loss
+        states, actions, rewards, dones, next_states = batch
+
+        states_t = torch.tensor(np.array(states, copy=False), dtype=torch.float32).to(self._device)
+        next_states_t = torch.tensor(np.array(next_states, copy=False), dtype=torch.float32).to(self._device)
+        actions_t = torch.tensor(np.array(actions), dtype=torch.int64).to(self._device)
+        rewards_t = torch.tensor(np.array(rewards), dtype=torch.float32).to(self._device)
+        dones_t = torch.tensor(np.array(dones), dtype=torch.bool).to(self._device)
+
+        state_values, next_state_values = self.Critique(states_t, next_states_t)
+
+        next_state_values[dones_t] = 0.0
+
+        state_values.squeeze_(-1)
+        next_state_values.squeeze_(-1)
+
+        delta = rewards_t + gamma * next_state_values
+
+        actor_loss = -torch.mean(actions_t * (delta - state_values))
+        critic_loss = F.mse_loss(delta, state_values)
+
+        (actor_loss + critic_loss).backward()
+        self._actor_critic._optimizer.step()
+
     def Learn(self, state, reward, next_state, done, gamma=0.99):
+        self._actor_critic._optimizer.zero_grad()
         state_t = torch.tensor([state], dtype=torch.float).to(self._device)
         
         next_state_t = torch.tensor([next_state], dtype=torch.float).to(self._device)
@@ -83,7 +112,6 @@ class AgentA2C(object):
         # action_t = torch.tensor(np.array(action)).to(self._device)
         done_t = torch.tensor(done).to(self._device)
 
-        self._actor_critic._optimizer.zero_grad()
         
         state_value, next_state_value = self.Critique(state_t, next_state_t)
 
@@ -103,8 +131,9 @@ class AgentA2C(object):
         probabilities = F.softmax(probabilities, dim=0)
         action_probs = torch.distributions.Categorical(probabilities)
         action = action_probs.sample()
-        self._log_probs = action_probs.log_prob(action)
-        return action.item()
+        # self._log_probs = action_probs.log_prob(action)
+        # return action.item()
+        return action.item(), action_probs.log_prob(action)
 
     def Critique(self, state, next_state):
         _, state_value = self._actor_critic(state)

@@ -10,10 +10,6 @@ import math
 _mode = 1
 _difficulty = 1
 
-# how many steps to play before copying
-
-
-
 def main():
     if _mode == 0:
         # human
@@ -23,12 +19,13 @@ def main():
     elif _mode == 1:
         from Minesweeper_Text_v0 import Minesweeper_Text_v0
         from BroomDQL import Agent
-        from Memory import Experience
-        from Memory import Memory
-        from Replay import Replay
+        from Replay import Experience
+        from Replay import UniformExperienceReplay
+        from Replay import PrioritizedExperienceReplay
+        from GameReplay import GameReplay
 
         # hyperparameters
-        memory_size = 1000
+        memory_size = 2000
         learning_rate = 1e-4
         gamma = .99
         
@@ -45,8 +42,9 @@ def main():
 
         device = torch.device("cuda")
         env = Minesweeper_Text_v0(_difficulty)
-        replay = Replay()
-        memory = Memory(memory_size)
+        replay = GameReplay()
+        memory = UniformExperienceReplay(memory_size)
+        # memory = PrioritizedExperienceReplay(memory_size, 0.6)
 
         # declare agent
         input_shape = env.observation_space.shape
@@ -65,19 +63,21 @@ def main():
         consecutive_wins = 0
         solved_games = 0
 
+        soft_reset_game = False
+
         while True:
             done = False
             win = False
             steps = 0
             accumulated_reward = 0
 
-            state = env.reset(True)
+            state = env.reset(soft_reset_game)
             while not done:
                 # take an action
                 if np.random.random() < epsilon:
                     action = env.action_space.sample()
                 else:
-                    action = agent.Act(state, device)
+                    action = agent.Act(state)
 
                 # perform the step
                 next_state, reward, done, info = env.step(action)
@@ -85,8 +85,12 @@ def main():
                 # record the memory if the agent didn't win/lose on first action
                 # this allows it to converge slightly faster.
                 exp = Experience(state, action, reward, done, next_state)
+
+                # error = agent.GetError(state, action, next_state, reward, done, gamma)
+                # exp = (error, (state, action, next_state, reward, done))
+
                 if not (steps == 0 and done):
-                    memory.append(exp)
+                    memory.Append(exp)
                     
                 state = next_state
 
@@ -98,10 +102,17 @@ def main():
                 if len(memory) < batch_size:
                     continue
 
-                batch = memory.sample(batch_size)
-                agent.LearnBatch(batch, gamma, device)
+                batch = memory.Sample(batch_size)
+                agent.LearnBatch(batch, gamma)
+
+                # batch, indices, is_weights = memory.Sample(batch_size)
+                # errors = agent.LearnBatchPER(batch, is_weights, gamma)
+
+                # for i in range(batch_size):
+                #     memory.Update(indices[i], errors[i])
 
             # after done
+            agent.UpdateTarget()
             games += 1
             win = info['win']
             if win:
@@ -136,6 +147,8 @@ def main():
     if _mode == 2:
         from BroomA2C import BroomConvoA2C
         from BroomA2C import AgentA2C
+        from Replay import UniformExperienceReplay
+        from Replay import Experience
         from Minesweeper_Text_v0 import Minesweeper_Text_v0
 
         learning_rate = 0.0001
@@ -144,11 +157,14 @@ def main():
         device = torch.device("cuda")
         env = Minesweeper_Text_v0(_difficulty)
         agent = AgentA2C(env.observation_space.shape, env.action_space.n, learning_rate, gamma, device)
+        memory = UniformExperienceReplay(1000)
 
         total_rewards = []
 
         n_epsiodes = 3500
         solved_win_count = 25
+
+        batch_size = 64
 
         total_steps = 0
 
@@ -170,17 +186,23 @@ def main():
             # SplitState(state)
             # state_n = compress_v(state)
             while not done:
-                action = agent.Act(state)
+                action, action_probs = agent.Act(state)
                 next_state, reward, done, info = env.step(action)
 
                 accumulated_reward += reward
 
-                agent.Learn(state, reward, next_state, done, gamma)
-                
-                state = next_state
+                exp = Experience(state, action, reward,done, next_state)
+
+                if not (steps == 0 and done):
+                    memory.Append(exp)
 
                 steps += 1
                 total_steps += 1
+
+                if len(memory) > batch_size:
+                    batch = memory.Sample(batch_size)
+                    agent.LearnBatch(batch)
+                state = next_state
 
             # after done
             games += 1
@@ -196,6 +218,7 @@ def main():
                 wins += 1
             else:            
                 print("{:<4}".format("lose"), end="")
+                consecutive_wins = 0
                 loses += 1
 
             print(" - games: %d, steps: %d, reward: %.3f, wins: %d, loses: %d, solved games: %d" %
