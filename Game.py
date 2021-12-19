@@ -13,11 +13,11 @@ _difficulty = 1
 def main():
     if _mode == 0:
         # human
-        from Minesweeper_v1 import Minesweeper_v1
-        env = Minesweeper_v1(human=_human, difficulty=_difficulty)
+        from Game.GUI.Minesweeper_v1 import Minesweeper_v1
+        env = Minesweeper_v1(human=True, difficulty=_difficulty)
         env.Play()
     elif _mode == 1:
-        from Minesweeper_Text_v0 import Minesweeper_Text_v0
+        from Game.CLI.Minesweeper_Text_v0 import Minesweeper_Text_v0
         from BroomDQL import Agent
         from Replay import Experience
         from Replay import UniformExperienceReplay
@@ -149,7 +149,7 @@ def main():
         from BroomA2C import AgentA2C
         from Replay import UniformExperienceReplay
         from Replay import Experience
-        from Minesweeper_Text_v0 import Minesweeper_Text_v0
+        from Game.CLI.Minesweeper_Text_v0 import Minesweeper_Text_v0
 
         learning_rate = 0.0001
         gamma = 0.99

@@ -21,3 +21,5 @@
 
     - Neural network to first decide which tiles MAY have a mine, via using convolutional NN on each tile... 
     - Train on a single tile and its neighbours?
+
+TODO clean up files in folders.
