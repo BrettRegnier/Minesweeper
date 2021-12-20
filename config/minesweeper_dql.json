@@ -8,13 +8,13 @@
     "q_learning_agent": {
         "type": "DoubleDQL",
         "name": "CartPole_v4",
-        "batch_size": 32, 
+        "batch_size": 64, 
         "kwargs": {
             "clip_grad": 10, 
             "gamma": 0.99, 
-            "target_update_frequency": 200, 
+            "target_update_frequency": 150, 
             "tau": 1.0,
-            "max_steps_per_episode": 200,
+            "max_steps_per_episode": 50,
             "seed": 0,
             "warm_up": -1,
             "device": "cuda"
@@ -52,10 +52,36 @@
         },
         "model": {
             "sequential": {
-                "fullyconnected": {
-                    "hidden_layers": [
+                "conv2d": {
+                    "filters": [
+                        80,
+                        80
+                    ],
+                    "kernels": [
+                        [ 5, 5 ], 
+                        [ 3, 3 ]
+                    ],
+                    "strides": [
+                        [ 1, 1 ],
+                        [ 1, 1 ]
+                    ],
+                    "paddings": [
+                        3,
+                        1
                     ],
                     "activations": [
+                        "relu",
+                        "relu"
+                    ],
+                    "pools": [],
+                    "flatten": true
+                },
+                "fullyconnected": {
+                    "hidden_layers": [
+                        1024
+                    ],
+                    "activations": [
+                        "relu"
                     ],
                     "dropouts": [],
                     "out_features": 1024,
@@ -65,11 +91,9 @@
             "head": {
                 "dueling": {
                     "hidden_layers": [
-                        1024,
                         1024
                     ],
                     "activations": [
-                        "relu",
                         "relu"
                     ],
                     "dropouts": [],
@@ -87,7 +111,7 @@
             },
             "step_window": 1,
             "reward_window": 100,
-            "reward_goal": 195,
+            "reward_goal": 10000,
             "train_checkpoint": true,
             "evaluate_checkpoint": true,
             "evaluate_episodes": 1,

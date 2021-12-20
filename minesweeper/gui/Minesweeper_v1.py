@@ -3,10 +3,10 @@ import numpy as np
 from gym import spaces
 
 import pygame
-from Game.GUI.Board import Board
-from Game.GUI.Menu import Menu
-from Game.GUI.Cursor import Cursor
-import Game.GUI.State as State
+from minesweeper.gui.Board import Board
+from minesweeper.gui.Menu import Menu
+from minesweeper.gui.Cursor import Cursor
+import minesweeper.gui.State as State
 
 
 class Minesweeper_v1(gym.Env):

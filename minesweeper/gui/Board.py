@@ -1,7 +1,7 @@
 import random
 
-import Game.GUI.State as State
-from Game.GUI.Tile import Tile
+import minesweeper.gui.State as State
+from minesweeper.gui.Tile import Tile
 
 import numpy as np
 

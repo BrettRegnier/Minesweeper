@@ -6,16 +6,17 @@ from torchdrl.factories.AgentFactory import AgentFactory
 from torchdrl.managers.RLManager import RLManager
 import torchdrl.tools.Config as Config
 
-from Game.CLI.Minesweeper_Text_v0 import Minesweeper_Text_v0
-from Game.GUI.Minesweeper_v1 import Minesweeper_v1
+from minesweeper.cli.Minesweeper_Text_v0 import Minesweeper_Text_v0
+from minesweeper.gui.Minesweeper_v1 import Minesweeper_v1
 
-config = Config.Load("./configurations/minesweeper_dql.json")
+config = Config.Load("./config/minesweeper_dql.json")
+
+num_envs = 1
+difficulty = 1
 
 envs = []
-for i in range(1):
-    envs.append(gym.make("CartPole-v0"))
-
-    
+for i in range(num_envs):
+    envs.append(Minesweeper_Text_v0(difficulty))
 
 # set the seed
 seed = 0
@@ -33,12 +34,3 @@ q_learning_agent = AgentFactory.CreateQLearningAgent(config['q_learning_agent'],
 manager = RLManager(q_learning_agent, **config['manager']['kwargs'])
 
 manager.TrainNoYield()
-class Broom: 
-    def __init__(self):
-        pass
-
-    def Train():
-        pass
-
-    def Test():
-        pass

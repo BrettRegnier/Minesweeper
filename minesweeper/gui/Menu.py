@@ -1,7 +1,7 @@
 from pygame import font
 
-import Game.GUI.State as State
-from Game.GUI.Button import Button
+import minesweeper.gui.State as State
+from minesweeper.gui.Button import Button
 
 
 class Menu():
