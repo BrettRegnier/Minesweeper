@@ -63,7 +63,7 @@ def main():
         consecutive_wins = 0
         solved_games = 0
 
-        soft_reset_game = False
+        soft_reset_game = True
 
         while True:
             done = False
@@ -151,13 +151,13 @@ def main():
         from Replay import Experience
         from Minesweeper_Text_v0 import Minesweeper_Text_v0
 
-        learning_rate = 0.0001
+        learning_rate = 0.001
         gamma = 0.99
 
         device = torch.device("cuda")
         env = Minesweeper_Text_v0(_difficulty)
         agent = AgentA2C(env.observation_space.shape, env.action_space.n, learning_rate, gamma, device)
-        memory = UniformExperienceReplay(1000)
+        memory = UniformExperienceReplay(10000)
 
         total_rewards = []
 
@@ -254,3 +254,69 @@ def PrintStatus():
 
 if __name__ == "__main__":
     main()
+    
+    from Minesweeper_Text_v0 import Minesweeper_Text_v0
+    from BroomAC import AgentA2C
+
+    env = Minesweeper_Text_v0(1)
+    num_steps = 80
+
+
+    learning_rate = 1e-3
+    gamma = 0.99
+    device = torch.device('cuda')
+    agent = AgentA2C(learning_rate, env.observation_space.shape, env.action_space.n, gamma, device, convo=True)
+
+    episodes = 0
+
+    wins = 0
+    loses = 0
+    consecutive_wins = 0
+
+    running_reward = 10
+    while True:
+        done = False
+        is_rendering = False
+        episode_reward = 0
+        state = env.reset(soft=False)
+        
+        steps = 0
+        
+        episodes += 1
+        while steps < num_steps and not done: 
+            
+            action = agent.Act(state)
+            
+            next_state, reward, done, info = env.step(action)
+            agent._rewards.append(reward)
+            
+            episode_reward += reward
+            
+            running_reward = 0.05 * episode_reward + (1 - 0.05) * running_reward
+            # agent.Learn_o(state, next_state, reward, done)
+        
+            state = next_state
+            
+            steps += 1
+        
+        agent.Learn()
+
+        
+        if info['win']:
+            print("{:<4}".format("win"), end="")
+            wins += 1
+            consecutive_wins += 1
+        else:
+            print("{:<4}".format("lose"), end="")
+            loses += 1
+            consecutive_wins = 0
+
+        print(" - episodes: %d, steps: %d, reward: %.3f, wins: %d, loses: %d, consecutive wins: %d" %
+                    (episodes, steps, running_reward, wins, loses, consecutive_wins), end=" ")
+        print("")
+
+        # check if we have "solved" the cart pole problem
+        if consecutive_wins > 10:
+            print("Solved! Running reward is now {} and "
+                    "the last episode runs to {} time steps!".format(running_reward, step))
+
