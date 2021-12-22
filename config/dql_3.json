@@ -1,0 +1,112 @@
+{
+    "env": {
+        "name": "Minesweeper",
+        "kwargs": {
+            "difficulty": 1
+        }
+    },
+    "agent": {
+        "device": "cuda",
+        "type": "DoubleDQL",
+        "name": "DoubleDQL_3",
+        "batch_size": 128,
+        "kwargs": {
+            "epsilon": 0.01,
+            "epsilon_decay": 0.99,
+            "epsilon_min": 0.01,
+            "clip_grad": 10,
+            "gamma": 0.99,
+            "target_update_frequency": 1000,
+            "tau": 1.0,
+            "step_window": 10,
+            "reward_window": 100,
+            "reward_goal": 100.1,
+            "max_steps_per_episode": 10,
+            "warm_up": -1,
+            "train_checkpoint": true,
+            "evaluate_checkpoint": true,
+            "evaluate_episodes": 100,
+            "evaluate_frequency": 100,
+            "checkpoint_root": "models/checkpoints",
+            "checkpoint_frequency": 1000,
+            "checkpoint_max_count": 100,
+            "visualize": false,
+            "visualize_frequency": -1,
+            "seed": 0
+        },
+        "optimizer": {
+            "name": "adam",
+            "kwargs": {
+                "lr": 0.000001
+            }
+        },
+        "scheduler": {
+            "name": "StepLR",
+            "kwargs": {
+                "step_size": 5,
+                "gamma": 0.6
+            }
+        },
+        "memories": {
+            "memory": {
+                "name": "ER",
+                "kwargs": {
+                    "capacity": 100000,
+                    "n_step": 1,
+                    "gamma": 0.99
+                }
+            }
+        },
+        "model": {
+            "sequential": {
+                "conv2d": {
+                    "filters": [
+                        64
+                    ],
+                    "kernels": [
+                        [
+                            5,
+                            5
+                        ]
+                    ],
+                    "strides": [
+                        [
+                            1,
+                            1
+                        ]
+                    ],
+                    "paddings": [
+                        0
+                    ],
+                    "activations": [
+                        "relu"
+                    ],
+                    "pools": [],
+                    "flatten": true
+                },
+                "fullyconnected": {
+                    "hidden_layers": [
+                        1024,
+                        512
+                    ],
+                    "activations": [
+                        "relu",
+                        "relu"
+                    ],
+                    "dropouts": [],
+                    "out_features": 512,
+                    "final_activation": "relu"
+                }
+            },
+            "head": {
+                "fullyconnected": {
+                    "hidden_layers": [],
+                    "activations": [],
+                    "dropouts": [],
+                    "out_features": null,
+                    "final_activation": null
+                }
+            }
+        }
+    }
+}

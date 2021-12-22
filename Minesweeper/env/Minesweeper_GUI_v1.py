@@ -3,15 +3,26 @@ import numpy as np
 from gym import spaces
 
 import pygame
-from Board import Board
-from Menu import Menu
-from Cursor import Cursor
-import State
+from Minesweeper.gui.Board import Board
+from Minesweeper.gui.Menu import Menu
+from Minesweeper.gui.Cursor import Cursor
+import Minesweeper.utils.GameState
 
 
-class Minesweeper_v1(gym.Env):
-    def __init__(self, human, difficulty):
-        super(Minesweeper_v1, self).__init__()
+class Minesweeper_GUI_v1(gym.Env):
+    def __init__(self, **kwargs):
+        """
+        Minesweeper with a gui
+        arguments:
+            -Difficulty: 1, 2. 3
+            -Mode: One-hot, simplified, basic
+        """
+        
+        difficulty = kwargs['difficulty'] if 'difficulty' in kwargs else 1
+
+        self._mode = kwargs['mode'] if 'mode' in kwargs else "one_hot"
+
+        super(Minesweeper_GUI_v1, self).__init__()
         self._human = human  # true or false
         self.Init()
         self.InitGame(difficulty)
@@ -50,12 +61,12 @@ class Minesweeper_v1(gym.Env):
         # reward = 0
         
         done = False
-        if State._gameover and State._win:
+        if GameState._gameover and GameState._win:
             reward = 1
             done = True
             win = True
             print("****win**** - ", end="")
-        elif State._gameover: # or self._steps == (self._columns * self._rows) - self._mines:
+        elif GameState._gameover: # or self._steps == (self._columns * self._rows) - self._mines:
             reward = -1
             done = True
             print("lose ", end="")
@@ -176,9 +187,9 @@ class Minesweeper_v1(gym.Env):
         self._board.Update(tick)
         self._cursor.Update(tick)
 
-        if State._gameover:
+        if GameState._gameover:
             self.Gameover()
-        if State._restart:
+        if GameState._restart:
             self.reset()
 
     def Draw(self):
@@ -236,9 +247,9 @@ class Minesweeper_v1(gym.Env):
         self._menu.Click(x, y, mtype)
 
     def Restart(self, hard):
-        State._restart = False
-        State._gameover = False
-        State._win = False
+        GameState._restart = False
+        GameState._gameover = False
+        GameState._win = False
         self._board.Reset(hard)
 
     def Play(self):
@@ -276,4 +287,4 @@ class Minesweeper_v1(gym.Env):
     def Gameover(self):
         if self._human == False:
             # if its a bot just restart
-            State._restart = True
+            GameState._restart = True

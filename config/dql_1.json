@@ -1,0 +1,89 @@
+{
+    "type": "Rainbow",
+    "name": "Broom",
+    "checkpoint_episode_frequency": 20,
+    "checkpoint_max_num": 10,
+    "checkpoint_root": "DragonFruit/checkpoints",
+    "device": "cuda",
+    "log": true,
+    "show_log": true,
+    "show_log_frequency": 1,
+    "reward_goal": 195.0,
+    "reward_window": 10,
+    "seed": 777,
+    "visualize": false,
+    "visualize_frequency": 10,
+    "warm_up": 0,
+    "num_steps": "inf",
+    "num_episodes": "inf",
+    "max_steps": 200,
+    "max_episodes": -1,
+    "hyperparameters": {
+        "batch_size": 32,
+        "clip_grad": 10.0,
+        "gamma": 0.99,
+        "n_steps": 1,
+        "target_update": 100,
+        "atom_size": 51,
+        "tau": 1.0,
+        "v_min": -200,
+        "v_max": 200,
+        "memory_type": "PER",
+        "memory_kwargs": {
+            "memory_size": 100000,
+            "alpha": 0.2,
+            "beta": 0.6
+        },
+        "optimizer": "adam",
+        "optimizer_kwargs": {
+            "lr": 0.0001
+        },
+        "network": {
+            "sequential": {
+                "conv2d": {
+                    "filters": [
+                        64
+                    ],
+                    "kernels": [
+                        5
+                    ],
+                    "strides": [
+                        1
+                    ],
+                    "paddings": [
+                        0
+                    ],
+                    "activations": [
+                        "relu"
+                    ],
+                    "pools": [],
+                    "flatten": true
+                },
+                "fullyconnected": {
+                    "hidden_layers": [
+                        1024
+                    ],
+                    "activations": [
+                        "relu"
+                    ],
+                    "dropouts": [],
+                    "out_features": 512,
+                    "final_activation": "relu"
+                }
+            },
+            "head": {
+                "noisyduelingcategorical": {
+                    "hidden_layers": [
+                        512
+                    ],
+                    "activations": [
+                        "relu"
+                    ],
+                    "dropouts": [],
+                    "out_features": null,
+                    "final_activation": null
+                }
+            }
+        }
+    }
+}
